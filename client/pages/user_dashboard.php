@@ -119,9 +119,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["image"])) {
       <div class="profile-wrapper">
         <div class="profile-circle" onclick="toggleDropdown()"><?= htmlspecialchars($initials) ?></div>
         <div class="dropdown" id="profileDropdown">
-          <a href="user_dashboard.php">Dashboard</a>
+          <a href="user_uploads_dashboard.php">Dashboard</a>
           <a href="#">Settings</a>
-          <a href="./server/logout.php">Logout</a>
+          <a href="logout.php">Logout</a>
         </div>
       </div>
     </div>
