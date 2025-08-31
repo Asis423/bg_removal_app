@@ -30,7 +30,7 @@ $users = $stmt->fetchAll();
                 <li><a class="nav-link" href="../index.php">Home</a></li>
                 <li><a class="nav-link" href="dashboard.php">Admin Dashboard</a></li>
                 <li><a class="nav-link active" href="users.php">Users</a></li>
-                <li><a class="nav-link" href="images.php">Images</a></li>
+                <li><a class="nav-link" href="uploads.php">Uploads</a></li>
                 <li class="nav-item dropdown">
                     <a class="nav-link" href="#" id="adminDropdown">
                         <i class="fas fa-user-shield"></i>
@@ -61,10 +61,10 @@ $users = $stmt->fetchAll();
                     <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Name</th>
+                            <th>Username</th>
                             <th>Email</th>
-                            <th>Role</th>
-                            <th>Images Count</th>
+                            <th>Admin</th>
+                            <th>Uploads Count</th>
                             <th>Joined</th>
                             <th>Actions</th>
                         </tr>
@@ -75,16 +75,16 @@ $users = $stmt->fetchAll();
                                 <td><?php echo $user['id']; ?></td>
                                 <td>
                                     <div class="user-info">
-                                        <div class="user-name"><?php echo htmlspecialchars($user['name']); ?></div>
+                                        <div class="user-name"><?php echo htmlspecialchars($user['username']); ?></div>
                                     </div>
                                 </td>
                                 <td><?php echo htmlspecialchars($user['email']); ?></td>
                                 <td>
-                                    <span class="status-badge status-<?php echo $user['role']; ?>">
-                                        <?php echo ucfirst($user['role']); ?>
+                                    <span class="status-badge status-<?php echo $user['is_admin'] ? 'admin' : 'user'; ?>">
+                                        <?php echo $user['is_admin'] ? 'Admin' : 'User'; ?>
                                     </span>
                                 </td>
-                                <td><?php echo getUserImageCount($user['id']); ?></td>
+                                <td><?php echo getUserUploadCount($user['id']); ?></td>
                                 <td><?php echo formatDate($user['created_at']); ?></td>
                                 <td>
                                     <div class="action-buttons">

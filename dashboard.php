@@ -7,8 +7,8 @@ requireLogin();
 
 $userId = getCurrentUserId();
 $user = getUserById($userId);
-$userImages = getUserImages($userId, 20);
-$totalImages = getUserImageCount($userId);
+$userUploads = getUserUploads($userId, 20);
+$totalUploads = getUserUploadCount($userId);
 ?>
 
 <!DOCTYPE html>
@@ -34,7 +34,7 @@ $totalImages = getUserImageCount($userId);
                 <li class="nav-item dropdown">
                     <a class="nav-link" href="#" id="userDropdown">
                         <i class="fas fa-user"></i>
-                        <?php echo htmlspecialchars($user['name']); ?>
+                        <?php echo htmlspecialchars($user['username']); ?>
                     </a>
                     <div class="dropdown-menu">
                         <a href="profile.php">Profile</a>
@@ -48,7 +48,7 @@ $totalImages = getUserImageCount($userId);
     <div class="container">
         <div class="dashboard-header">
             <div class="dashboard-welcome">
-                <h1>Welcome back, <?php echo htmlspecialchars($user['name']); ?>!</h1>
+                <h1>Welcome back, <?php echo htmlspecialchars($user['username']); ?>!</h1>
                 <p>Manage your background removal projects and track your progress</p>
             </div>
             <div class="dashboard-stats">
@@ -57,8 +57,8 @@ $totalImages = getUserImageCount($userId);
                         <i class="fas fa-images"></i>
                     </div>
                     <div class="stat-content">
-                        <div class="stat-number"><?php echo $totalImages; ?></div>
-                        <div class="stat-label">Total Images</div>
+                        <div class="stat-number"><?php echo $totalUploads; ?></div>
+                        <div class="stat-label">Total Uploads</div>
                     </div>
                 </div>
                 <div class="stat-card">
@@ -66,8 +66,8 @@ $totalImages = getUserImageCount($userId);
                         <i class="fas fa-check-circle"></i>
                     </div>
                     <div class="stat-content">
-                        <div class="stat-number"><?php echo count(array_filter($userImages, function($img) { return $img['status'] === 'completed'; })); ?></div>
-                        <div class="stat-label">Completed</div>
+                        <div class="stat-number"><?php echo count(array_filter($userUploads, function($upload) { return !empty($upload['output_path']); })); ?></div>
+                        <div class="stat-label">Processed</div>
                     </div>
                 </div>
                 <div class="stat-card">
@@ -75,8 +75,8 @@ $totalImages = getUserImageCount($userId);
                         <i class="fas fa-clock"></i>
                     </div>
                     <div class="stat-content">
-                        <div class="stat-number"><?php echo count(array_filter($userImages, function($img) { return $img['status'] === 'processing'; })); ?></div>
-                        <div class="stat-label">Processing</div>
+                        <div class="stat-number"><?php echo count(array_filter($userUploads, function($upload) { return empty($upload['output_path']); })); ?></div>
+                        <div class="stat-label">Pending</div>
                     </div>
                 </div>
             </div>
@@ -96,45 +96,44 @@ $totalImages = getUserImageCount($userId);
         <div class="dashboard-content">
             <div class="content-section">
                 <div class="section-header">
-                    <h2>Recent Images</h2>
+                    <h2>Recent Uploads</h2>
                     <a href="gallery.php" class="view-all">View All</a>
                 </div>
 
-                <?php if (empty($userImages)): ?>
+                <?php if (empty($userUploads)): ?>
                     <div class="empty-state">
                         <div class="empty-icon">
                             <i class="fas fa-images"></i>
                         </div>
-                        <h3>No images yet</h3>
+                        <h3>No uploads yet</h3>
                         <p>Start by uploading your first image to remove the background</p>
                         <a href="upload.php" class="btn-primary">Upload Image</a>
                     </div>
                 <?php else: ?>
                     <div class="image-grid">
-                        <?php foreach ($userImages as $image): ?>
+                        <?php foreach ($userUploads as $upload): ?>
                             <div class="image-card">
                                 <div class="image-preview">
-                                    <?php if ($image['status'] === 'completed' && $image['processed_path']): ?>
-                                        <img src="<?php echo htmlspecialchars($image['processed_path']); ?>" alt="Processed Image">
+                                    <?php if (!empty($upload['output_path'])): ?>
+                                        <img src="<?php echo htmlspecialchars($upload['output_path']); ?>" alt="Processed Image">
                                     <?php else: ?>
-                                        <img src="<?php echo htmlspecialchars($image['original_path']); ?>" alt="Original Image">
+                                        <img src="<?php echo htmlspecialchars($upload['saved_path']); ?>" alt="Original Image">
                                     <?php endif; ?>
-                                    <div class="image-status status-<?php echo $image['status']; ?>">
-                                        <?php echo ucfirst($image['status']); ?>
+                                    <div class="image-status status-<?php echo !empty($upload['output_path']) ? 'completed' : 'pending'; ?>">
+                                        <?php echo !empty($upload['output_path']) ? 'Processed' : 'Pending'; ?>
                                     </div>
                                 </div>
                                 <div class="image-info">
-                                    <div class="image-name"><?php echo htmlspecialchars($image['original_filename']); ?></div>
+                                    <div class="image-name"><?php echo htmlspecialchars($upload['original_filename']); ?></div>
                                     <div class="image-meta">
-                                        <span class="image-size"><?php echo formatFileSize($image['file_size']); ?></span>
-                                        <span class="image-date"><?php echo formatDate($image['created_at']); ?></span>
+                                        <span class="image-date"><?php echo formatDate($upload['uploaded_at']); ?></span>
                                     </div>
-                                    <?php if ($image['status'] === 'completed' && $image['processed_path']): ?>
+                                    <?php if (!empty($upload['output_path'])): ?>
                                         <div class="image-actions">
-                                            <a href="<?php echo htmlspecialchars($image['processed_path']); ?>" download class="btn-download-small">
+                                            <a href="<?php echo htmlspecialchars($upload['output_path']); ?>" download class="btn-download-small">
                                                 <i class="fas fa-download"></i>
                                             </a>
-                                            <a href="process.php?id=<?php echo $image['id']; ?>" class="btn-process-small">
+                                            <a href="process.php?id=<?php echo $upload['id']; ?>" class="btn-process-small">
                                                 <i class="fas fa-magic"></i>
                                             </a>
                                         </div>

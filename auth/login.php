@@ -18,15 +18,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Please enter both email and password';
     } else {
         $user = getUserByEmail($email);
-        if ($user && verifyPassword($password, $user['password'])) {
+        if ($user && verifyPassword($password, $user['password_hash'])) {
             // Set session variables
             $_SESSION['user_id'] = $user['id'];
-            $_SESSION['user_name'] = $user['name'];
-            $_SESSION['user_email'] = $user['email'];
-            $_SESSION['user_role'] = $user['role'];
+            $_SESSION['username'] = $user['username'];
+            $_SESSION['email'] = $user['email'];
+            $_SESSION['is_admin'] = $user['is_admin'];
             
-            // Redirect based on role
-            if ($user['role'] === 'admin') {
+            // Redirect based on admin status
+            if ($user['is_admin']) {
                 header('Location: ../admin/dashboard.php');
             } else {
                 header('Location: ../dashboard.php');

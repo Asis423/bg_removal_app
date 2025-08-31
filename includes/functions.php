@@ -41,38 +41,46 @@ function getUserById($id) {
 }
 
 // Function to create user
-function createUser($name, $email, $password) {
+function createUser($username, $email, $password) {
     global $pdo;
     $hashedPassword = hashPassword($password);
-    $stmt = $pdo->prepare("INSERT INTO users (name, email, password) VALUES (?, ?, ?)");
-    return $stmt->execute([$name, $email, $hashedPassword]);
+    $stmt = $pdo->prepare("INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)");
+    return $stmt->execute([$username, $email, $hashedPassword]);
 }
 
-// Function to get user's image count
-function getUserImageCount($userId) {
+// Function to get user's upload count
+function getUserUploadCount($userId) {
     global $pdo;
-    $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM images WHERE user_id = ?");
+    $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM uploads WHERE user_id = ?");
     $stmt->execute([$userId]);
     $result = $stmt->fetch();
     return $result['count'];
 }
 
-// Function to get user's images
-function getUserImages($userId, $limit = 10) {
+// Function to get user's uploads
+function getUserUploads($userId, $limit = 10) {
     global $pdo;
-    $stmt = $pdo->prepare("SELECT * FROM images WHERE user_id = ? ORDER BY created_at DESC LIMIT ?");
+    $stmt = $pdo->prepare("
+        SELECT u.*, pi.output_path, pi.processed_at 
+        FROM uploads u 
+        LEFT JOIN processed_images pi ON u.id = pi.upload_id 
+        WHERE u.user_id = ? 
+        ORDER BY u.uploaded_at DESC 
+        LIMIT ?
+    ");
     $stmt->execute([$userId, $limit]);
     return $stmt->fetchAll();
 }
 
-// Function to get all images for admin
-function getAllImages($limit = 50) {
+// Function to get all uploads for admin
+function getAllUploads($limit = 50) {
     global $pdo;
     $stmt = $pdo->prepare("
-        SELECT i.*, u.name as user_name, u.email as user_email 
-        FROM images i 
-        JOIN users u ON i.user_id = u.id 
-        ORDER BY i.created_at DESC 
+        SELECT u.*, us.username, us.email, pi.output_path, pi.processed_at 
+        FROM uploads u 
+        JOIN users us ON u.user_id = us.id 
+        LEFT JOIN processed_images pi ON u.id = pi.upload_id 
+        ORDER BY u.uploaded_at DESC 
         LIMIT ?
     ");
     $stmt->execute([$limit]);
@@ -87,47 +95,58 @@ function getTotalUsersCount() {
     return $result['count'];
 }
 
-// Function to get total images count
-function getTotalImagesCount() {
+// Function to get total uploads count
+function getTotalUploadsCount() {
     global $pdo;
-    $stmt = $pdo->query("SELECT COUNT(*) as count FROM images");
+    $stmt = $pdo->query("SELECT COUNT(*) as count FROM uploads");
     $result = $stmt->fetch();
     return $result['count'];
 }
 
-// Function to get images by status
-function getImagesByStatus($status) {
+// Function to get total processed images count
+function getTotalProcessedCount() {
     global $pdo;
-    $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM images WHERE status = ?");
-    $stmt->execute([$status]);
+    $stmt = $pdo->query("SELECT COUNT(*) as count FROM processed_images");
     $result = $stmt->fetch();
     return $result['count'];
 }
 
-// Function to save image record
-function saveImageRecord($userId, $originalFilename, $originalPath, $fileSize) {
+// Function to get total downloads count
+function getTotalDownloadsCount() {
+    global $pdo;
+    $stmt = $pdo->query("SELECT COUNT(*) as count FROM downloads");
+    $result = $stmt->fetch();
+    return $result['count'];
+}
+
+// Function to save upload record
+function saveUploadRecord($userId, $originalFilename, $savedPath) {
     global $pdo;
     $stmt = $pdo->prepare("
-        INSERT INTO images (user_id, original_filename, original_path, file_size) 
-        VALUES (?, ?, ?, ?)
+        INSERT INTO uploads (user_id, original_filename, saved_path) 
+        VALUES (?, ?, ?)
     ");
-    return $stmt->execute([$userId, $originalFilename, $originalPath, $fileSize]);
+    return $stmt->execute([$userId, $originalFilename, $savedPath]);
 }
 
-// Function to update image status
-function updateImageStatus($imageId, $status, $processedPath = null) {
+// Function to save processed image record
+function saveProcessedImageRecord($uploadId, $outputPath) {
     global $pdo;
-    if ($processedPath) {
-        $stmt = $pdo->prepare("
-            UPDATE images 
-            SET status = ?, processed_path = ?, processed_at = CURRENT_TIMESTAMP 
-            WHERE id = ?
-        ");
-        return $stmt->execute([$status, $processedPath, $imageId]);
-    } else {
-        $stmt = $pdo->prepare("UPDATE images SET status = ? WHERE id = ?");
-        return $stmt->execute([$status, $imageId]);
-    }
+    $stmt = $pdo->prepare("
+        INSERT INTO processed_images (upload_id, output_path) 
+        VALUES (?, ?)
+    ");
+    return $stmt->execute([$uploadId, $outputPath]);
+}
+
+// Function to save download record
+function saveDownloadRecord($userId, $processedImageId) {
+    global $pdo;
+    $stmt = $pdo->prepare("
+        INSERT INTO downloads (user_id, processed_image_id) 
+        VALUES (?, ?)
+    ");
+    return $stmt->execute([$userId, $processedImageId]);
 }
 
 // Function to generate random filename
@@ -170,5 +189,19 @@ function formatDate($date) {
     } else {
         return date('M j, Y', $timestamp);
     }
+}
+
+// Function to get upload by ID
+function getUploadById($uploadId) {
+    global $pdo;
+    $stmt = $pdo->prepare("
+        SELECT u.*, us.username, pi.output_path, pi.processed_at 
+        FROM uploads u 
+        JOIN users us ON u.user_id = us.id 
+        LEFT JOIN processed_images pi ON u.id = pi.upload_id 
+        WHERE u.id = ?
+    ");
+    $stmt->execute([$uploadId]);
+    return $stmt->fetch();
 }
 ?>

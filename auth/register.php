@@ -5,13 +5,13 @@ $error = '';
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = sanitizeInput($_POST['name']);
+    $username = sanitizeInput($_POST['username']);
     $email = sanitizeInput($_POST['email']);
     $password = $_POST['password'];
     $confirmPassword = $_POST['confirm_password'];
     
     // Validation
-    if (empty($name) || empty($email) || empty($password)) {
+    if (empty($username) || empty($email) || empty($password)) {
         $error = 'All fields are required';
     } elseif (!isValidEmail($email)) {
         $error = 'Please enter a valid email address';
@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Email already registered. Please use a different email or login.';
         } else {
             // Create user
-            if (createUser($name, $email, $password)) {
+            if (createUser($username, $email, $password)) {
                 $success = 'Registration successful! You can now login.';
             } else {
                 $error = 'Registration failed. Please try again.';
@@ -84,8 +84,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <form method="POST" class="auth-form">
                     <div class="form-group">
-                        <label for="name">Full Name</label>
-                        <input type="text" id="name" name="name" value="<?php echo isset($_POST['name']) ? htmlspecialchars($_POST['name']) : ''; ?>" required>
+                        <label for="username">Username</label>
+                        <input type="text" id="username" name="username" value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>" required>
                     </div>
 
                     <div class="form-group">

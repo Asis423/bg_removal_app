@@ -5,8 +5,8 @@ require_once '../config/session.php';
 // Require admin access
 requireAdmin();
 
-// Get all images with user information
-$images = getAllImages(100);
+// Get all uploads with user information
+$uploads = getAllUploads(100);
 ?>
 
 <!DOCTYPE html>
@@ -14,7 +14,7 @@ $images = getAllImages(100);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Images - Admin Dashboard</title>
+    <title>Manage Uploads - Admin Dashboard</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../client/components/css/style.css">
 </head>
@@ -29,7 +29,7 @@ $images = getAllImages(100);
                 <li><a class="nav-link" href="../index.php">Home</a></li>
                 <li><a class="nav-link" href="dashboard.php">Admin Dashboard</a></li>
                 <li><a class="nav-link" href="users.php">Users</a></li>
-                <li><a class="nav-link active" href="images.php">Images</a></li>
+                <li><a class="nav-link active" href="uploads.php">Uploads</a></li>
                 <li class="nav-item dropdown">
                     <a class="nav-link" href="#" id="adminDropdown">
                         <i class="fas fa-user-shield"></i>
@@ -46,13 +46,13 @@ $images = getAllImages(100);
 
     <div class="container">
         <div class="admin-header">
-            <h1>Manage Images</h1>
+            <h1>Manage Uploads</h1>
             <p>View and manage all uploaded images</p>
         </div>
 
         <div class="content-section">
             <div class="section-header">
-                <h2>All Images (<?php echo count($images); ?>)</h2>
+                <h2>All Uploads (<?php echo count($uploads); ?>)</h2>
             </div>
 
             <div class="admin-table-container">
@@ -63,45 +63,41 @@ $images = getAllImages(100);
                             <th>User</th>
                             <th>Image</th>
                             <th>Status</th>
-                            <th>Size</th>
-                            <th>Resolution</th>
                             <th>Uploaded</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($images as $image): ?>
+                        <?php foreach ($uploads as $upload): ?>
                             <tr>
-                                <td><?php echo $image['id']; ?></td>
+                                <td><?php echo $upload['id']; ?></td>
                                 <td>
                                     <div class="user-info">
-                                        <div class="user-name"><?php echo htmlspecialchars($image['user_name']); ?></div>
-                                        <div class="user-email"><?php echo htmlspecialchars($image['user_email']); ?></div>
+                                        <div class="user-name"><?php echo htmlspecialchars($upload['username']); ?></div>
+                                        <div class="user-email"><?php echo htmlspecialchars($upload['email']); ?></div>
                                     </div>
                                 </td>
                                 <td>
                                     <div class="image-info-cell">
-                                        <div class="image-name"><?php echo htmlspecialchars($image['original_filename']); ?></div>
+                                        <div class="image-name"><?php echo htmlspecialchars($upload['original_filename']); ?></div>
                                         <div class="image-preview-small">
-                                            <img src="../<?php echo htmlspecialchars($image['original_path']); ?>" alt="Image Preview">
+                                            <img src="../<?php echo htmlspecialchars($upload['saved_path']); ?>" alt="Image Preview">
                                         </div>
                                     </div>
                                 </td>
                                 <td>
-                                    <span class="status-badge status-<?php echo $image['status']; ?>">
-                                        <?php echo ucfirst($image['status']); ?>
+                                    <span class="status-badge status-<?php echo !empty($upload['output_path']) ? 'completed' : 'pending'; ?>">
+                                        <?php echo !empty($upload['output_path']) ? 'Processed' : 'Pending'; ?>
                                     </span>
                                 </td>
-                                <td><?php echo formatFileSize($image['file_size']); ?></td>
-                                <td><?php echo htmlspecialchars($image['resolution']); ?></td>
-                                <td><?php echo formatDate($image['created_at']); ?></td>
+                                <td><?php echo formatDate($upload['uploaded_at']); ?></td>
                                 <td>
                                     <div class="action-buttons">
-                                        <a href="../<?php echo htmlspecialchars($image['original_path']); ?>" target="_blank" class="btn-view">
+                                        <a href="../<?php echo htmlspecialchars($upload['saved_path']); ?>" target="_blank" class="btn-view">
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        <?php if ($image['processed_path']): ?>
-                                            <a href="../<?php echo htmlspecialchars($image['processed_path']); ?>" target="_blank" class="btn-view">
+                                        <?php if (!empty($upload['output_path'])): ?>
+                                            <a href="../<?php echo htmlspecialchars($upload['output_path']); ?>" target="_blank" class="btn-view">
                                                 <i class="fas fa-magic"></i>
                                             </a>
                                         <?php endif; ?>

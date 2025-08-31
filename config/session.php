@@ -8,7 +8,7 @@ function isLoggedIn() {
 
 // Function to check if user is admin
 function isAdmin() {
-    return isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin';
+    return isset($_SESSION['is_admin']) && $_SESSION['is_admin'] == 1;
 }
 
 // Function to get current user ID
@@ -16,15 +16,15 @@ function getCurrentUserId() {
     return $_SESSION['user_id'] ?? null;
 }
 
-// Function to get current user role
-function getCurrentUserRole() {
-    return $_SESSION['user_role'] ?? null;
+// Function to get current username
+function getCurrentUsername() {
+    return $_SESSION['username'] ?? null;
 }
 
 // Function to redirect if not logged in
 function requireLogin() {
     if (!isLoggedIn()) {
-        header('Location: login.php');
+        header('Location: auth/login.php');
         exit();
     }
 }

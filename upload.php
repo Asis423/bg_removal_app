@@ -36,10 +36,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             if (move_uploaded_file($fileTmp, $uploadPath)) {
                 // Save to database
-                if (saveImageRecord($userId, $fileName, $uploadPath, $fileSize)) {
+                if (saveUploadRecord($userId, $fileName, $uploadPath)) {
                     $success = 'Image uploaded successfully! You can now process it to remove the background.';
                 } else {
-                    $error = 'Failed to save image record. Please try again.';
+                    $error = 'Failed to save upload record. Please try again.';
                     // Remove uploaded file if database save failed
                     unlink($uploadPath);
                 }
@@ -76,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <li class="nav-item dropdown">
                     <a class="nav-link" href="#" id="userDropdown">
                         <i class="fas fa-user"></i>
-                        <?php echo htmlspecialchars($user['name']); ?>
+                        <?php echo htmlspecialchars($user['username']); ?>
                     </a>
                     <div class="dropdown-menu">
                         <a href="profile.php">Profile</a>

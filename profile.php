@@ -11,40 +11,40 @@ $error = '';
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = sanitizeInput($_POST['name']);
+    $username = sanitizeInput($_POST['username']);
     $currentPassword = $_POST['current_password'];
     $newPassword = $_POST['new_password'];
     $confirmPassword = $_POST['confirm_password'];
     
-    if (empty($name)) {
-        $error = 'Name is required';
+    if (empty($username)) {
+        $error = 'Username is required';
     } elseif (!empty($newPassword)) {
         // Password change requested
-        if (!verifyPassword($currentPassword, $user['password'])) {
+        if (!verifyPassword($currentPassword, $user['password_hash'])) {
             $error = 'Current password is incorrect';
         } elseif (strlen($newPassword) < 6) {
             $error = 'New password must be at least 6 characters long';
         } elseif ($newPassword !== $confirmPassword) {
             $error = 'New passwords do not match';
         } else {
-            // Update name and password
+            // Update username and password
             $hashedPassword = hashPassword($newPassword);
-            $stmt = $pdo->prepare("UPDATE users SET name = ?, password = ? WHERE id = ?");
-            if ($stmt->execute([$name, $hashedPassword, $userId])) {
+            $stmt = $pdo->prepare("UPDATE users SET username = ?, password_hash = ? WHERE id = ?");
+            if ($stmt->execute([$username, $hashedPassword, $userId])) {
                 $success = 'Profile updated successfully!';
-                $user['name'] = $name;
+                $user['username'] = $username;
             } else {
                 $error = 'Failed to update profile. Please try again.';
             }
         }
     } else {
-        // Only name update
-        $stmt = $pdo->prepare("UPDATE users SET name = ? WHERE id = ?");
-        if ($stmt->execute([$name, $userId])) {
-            $success = 'Name updated successfully!';
-            $user['name'] = $name;
+        // Only username update
+        $stmt = $pdo->prepare("UPDATE users SET username = ? WHERE id = ?");
+        if ($stmt->execute([$username, $userId])) {
+            $success = 'Username updated successfully!';
+            $user['username'] = $username;
         } else {
-            $error = 'Failed to update name. Please try again.';
+            $error = 'Failed to update username. Please try again.';
         }
     }
 }
@@ -73,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <li class="nav-item dropdown">
                     <a class="nav-link active" href="#" id="userDropdown">
                         <i class="fas fa-user"></i>
-                        <?php echo htmlspecialchars($user['name']); ?>
+                        <?php echo htmlspecialchars($user['username']); ?>
                     </a>
                     <div class="dropdown-menu">
                         <a href="dashboard.php">Dashboard</a>
@@ -114,8 +114,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <form method="POST" class="profile-form">
                     <div class="form-group">
-                        <label for="name">Full Name</label>
-                        <input type="text" id="name" name="name" value="<?php echo htmlspecialchars($user['name']); ?>" required>
+                        <label for="username">Username</label>
+                        <input type="text" id="username" name="username" value="<?php echo htmlspecialchars($user['username']); ?>" required>
                     </div>
 
                     <div class="form-group">
@@ -125,8 +125,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
 
                     <div class="form-group">
-                        <label for="role">Account Type</label>
-                        <input type="text" id="role" value="<?php echo ucfirst($user['role']); ?>" disabled>
+                        <label for="admin">Account Type</label>
+                        <input type="text" id="admin" value="<?php echo $user['is_admin'] ? 'Admin' : 'User'; ?>" disabled>
                     </div>
 
                     <div class="form-group">
@@ -171,11 +171,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="profile-stats">
                 <div class="stat-card">
                     <div class="stat-icon">
-                        <i class="fas fa-images"></i>
+                        <i class="fas fa-upload"></i>
                     </div>
                     <div class="stat-content">
-                        <div class="stat-number"><?php echo getUserImageCount($userId); ?></div>
-                        <div class="stat-label">Total Images</div>
+                        <div class="stat-number"><?php echo getUserUploadCount($userId); ?></div>
+                        <div class="stat-label">Total Uploads</div>
                     </div>
                 </div>
                 <div class="stat-card">
@@ -183,8 +183,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <i class="fas fa-check-circle"></i>
                     </div>
                     <div class="stat-content">
-                        <div class="stat-number"><?php echo count(array_filter(getUserImages($userId), function($img) { return $img['status'] === 'completed'; })); ?></div>
-                        <div class="stat-label">Completed</div>
+                        <div class="stat-number"><?php echo count(array_filter(getUserUploads($userId), function($upload) { return !empty($upload['output_path']); })); ?></div>
+                        <div class="stat-label">Processed</div>
                     </div>
                 </div>
             </div>

@@ -6,11 +6,10 @@ require_once '../config/session.php';
 requireAdmin();
 
 $totalUsers = getTotalUsersCount();
-$totalImages = getTotalImagesCount();
-$completedImages = getImagesByStatus('completed');
-$processingImages = getImagesByStatus('processing');
-$failedImages = getImagesByStatus('failed');
-$recentImages = getAllImages(10);
+$totalUploads = getTotalUploadsCount();
+$totalProcessed = getTotalProcessedCount();
+$totalDownloads = getTotalDownloadsCount();
+$recentUploads = getAllUploads(10);
 ?>
 
 <!DOCTYPE html>
@@ -33,7 +32,7 @@ $recentImages = getAllImages(10);
                 <li><a class="nav-link" href="../index.php">Home</a></li>
                 <li><a class="nav-link active" href="dashboard.php">Admin Dashboard</a></li>
                 <li><a class="nav-link" href="users.php">Users</a></li>
-                <li><a class="nav-link" href="images.php">Images</a></li>
+                <li><a class="nav-link" href="uploads.php">Uploads</a></li>
                 <li class="nav-item dropdown">
                     <a class="nav-link" href="#" id="adminDropdown">
                         <i class="fas fa-user-shield"></i>
@@ -66,11 +65,11 @@ $recentImages = getAllImages(10);
             </div>
             <div class="stat-card admin-stat">
                 <div class="stat-icon">
-                    <i class="fas fa-images"></i>
+                    <i class="fas fa-upload"></i>
                 </div>
                 <div class="stat-content">
-                    <div class="stat-number"><?php echo $totalImages; ?></div>
-                    <div class="stat-label">Total Images</div>
+                    <div class="stat-number"><?php echo $totalUploads; ?></div>
+                    <div class="stat-label">Total Uploads</div>
                 </div>
             </div>
             <div class="stat-card admin-stat">
@@ -78,26 +77,17 @@ $recentImages = getAllImages(10);
                     <i class="fas fa-check-circle"></i>
                 </div>
                 <div class="stat-content">
-                    <div class="stat-number"><?php echo $completedImages; ?></div>
-                    <div class="stat-label">Completed</div>
+                    <div class="stat-number"><?php echo $totalProcessed; ?></div>
+                    <div class="stat-label">Processed Images</div>
                 </div>
             </div>
             <div class="stat-card admin-stat">
                 <div class="stat-icon">
-                    <i class="fas fa-clock"></i>
+                    <i class="fas fa-download"></i>
                 </div>
                 <div class="stat-content">
-                    <div class="stat-number"><?php echo $processingImages; ?></div>
-                    <div class="stat-label">Processing</div>
-                </div>
-            </div>
-            <div class="stat-card admin-stat">
-                <div class="stat-icon">
-                    <i class="fas fa-exclamation-triangle"></i>
-                </div>
-                <div class="stat-content">
-                    <div class="stat-number"><?php echo $failedImages; ?></div>
-                    <div class="stat-label">Failed</div>
+                    <div class="stat-number"><?php echo $totalDownloads; ?></div>
+                    <div class="stat-label">Downloads</div>
                 </div>
             </div>
         </div>
@@ -105,8 +95,8 @@ $recentImages = getAllImages(10);
         <div class="admin-content">
             <div class="content-section">
                 <div class="section-header">
-                    <h2>Recent Image Activity</h2>
-                    <a href="images.php" class="view-all">View All Images</a>
+                    <h2>Recent Upload Activity</h2>
+                    <a href="uploads.php" class="view-all">View All Uploads</a>
                 </div>
 
                 <div class="admin-table-container">
@@ -116,42 +106,40 @@ $recentImages = getAllImages(10);
                                 <th>User</th>
                                 <th>Image</th>
                                 <th>Status</th>
-                                <th>Size</th>
-                                <th>Date</th>
+                                <th>Uploaded</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach ($recentImages as $image): ?>
+                            <?php foreach ($recentUploads as $upload): ?>
                                 <tr>
                                     <td>
                                         <div class="user-info">
-                                            <div class="user-name"><?php echo htmlspecialchars($image['user_name']); ?></div>
-                                            <div class="user-email"><?php echo htmlspecialchars($image['user_email']); ?></div>
+                                            <div class="user-name"><?php echo htmlspecialchars($upload['username']); ?></div>
+                                            <div class="user-email"><?php echo htmlspecialchars($upload['email']); ?></div>
                                         </div>
                                     </td>
                                     <td>
                                         <div class="image-info-cell">
-                                            <div class="image-name"><?php echo htmlspecialchars($image['original_filename']); ?></div>
+                                            <div class="image-name"><?php echo htmlspecialchars($upload['original_filename']); ?></div>
                                             <div class="image-preview-small">
-                                                <img src="<?php echo htmlspecialchars($image['original_path']); ?>" alt="Image Preview">
+                                                <img src="../<?php echo htmlspecialchars($upload['saved_path']); ?>" alt="Image Preview">
                                             </div>
                                         </div>
                                     </td>
                                     <td>
-                                        <span class="status-badge status-<?php echo $image['status']; ?>">
-                                            <?php echo ucfirst($image['status']); ?>
+                                        <span class="status-badge status-<?php echo !empty($upload['output_path']) ? 'completed' : 'pending'; ?>">
+                                            <?php echo !empty($upload['output_path']) ? 'Processed' : 'Pending'; ?>
                                         </span>
                                     </td>
-                                    <td><?php echo formatFileSize($image['file_size']); ?></td>
-                                    <td><?php echo formatDate($image['created_at']); ?></td>
+                                    <td><?php echo formatDate($upload['uploaded_at']); ?></td>
                                     <td>
                                         <div class="action-buttons">
-                                            <a href="../<?php echo htmlspecialchars($image['original_path']); ?>" target="_blank" class="btn-view">
+                                            <a href="../<?php echo htmlspecialchars($upload['saved_path']); ?>" target="_blank" class="btn-view">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <?php if ($image['processed_path']): ?>
-                                                <a href="../<?php echo htmlspecialchars($image['processed_path']); ?>" target="_blank" class="btn-view">
+                                            <?php if (!empty($upload['output_path'])): ?>
+                                                <a href="../<?php echo htmlspecialchars($upload['output_path']); ?>" target="_blank" class="btn-view">
                                                     <i class="fas fa-magic"></i>
                                                 </a>
                                             <?php endif; ?>
@@ -172,9 +160,9 @@ $recentImages = getAllImages(10);
                             <i class="fas fa-users"></i>
                             Manage Users
                         </a>
-                        <a href="images.php" class="btn-secondary">
-                            <i class="fas fa-images"></i>
-                            View All Images
+                        <a href="uploads.php" class="btn-secondary">
+                            <i class="fas fa-upload"></i>
+                            View All Uploads
                         </a>
                         <a href="system.php" class="btn-secondary">
                             <i class="fas fa-cog"></i>

@@ -37,7 +37,7 @@ if (isLoggedIn()) {
                     <li class="nav-item dropdown">
                         <a class="nav-link" href="#" id="userDropdown">
                             <i class="fas fa-user"></i>
-                            <?php echo htmlspecialchars($user['name']); ?>
+                            <?php echo htmlspecialchars($user['username']); ?>
                         </a>
                         <div class="dropdown-menu">
                             <a href="dashboard.php">Dashboard</a>
@@ -68,7 +68,7 @@ if (isLoggedIn()) {
                             <i class="fas fa-upload"></i> Upload & Process Image
                         </a>
                         <a href="dashboard.php" class="btn-secondary">
-                            <i class="fas fa-images"></i> View My Images
+                            <i class="fas fa-images"></i> View My Uploads
                         </a>
                     <?php else: ?>
                         <a href="#upload" class="btn-primary">
@@ -103,7 +103,7 @@ if (isLoggedIn()) {
                         <div class="upload-subtext">Supports JPG, PNG, WEBP • Max 10MB</div>
                         <div class="upload-note">
                             <i class="fas fa-info-circle"></i>
-                            <a href="auth/register.php">Sign up</a> to save and track your images
+                            <a href="auth/register.php">Sign up</a> to save and track your uploads
                         </div>
                     </div>
                     <input type="file" id="fileInput" class="file-input" accept="image/*" onchange="handleFileSelect(event)">

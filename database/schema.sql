@@ -6,33 +6,55 @@ USE bg_removal_app;
 -- Users table
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
+    username VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    role ENUM('user', 'admin') DEFAULT 'user',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    password_hash VARCHAR(255) NOT NULL,
+    is_admin TINYINT(1) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Images table to track uploaded images
-CREATE TABLE images (
+-- Uploads table
+CREATE TABLE uploads (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     original_filename VARCHAR(255) NOT NULL,
-    original_path VARCHAR(500) NOT NULL,
-    processed_path VARCHAR(500) NULL,
-    status ENUM('uploaded', 'processing', 'completed', 'failed') DEFAULT 'uploaded',
-    resolution VARCHAR(50) DEFAULT 'original',
-    file_size INT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    processed_at TIMESTAMP NULL,
+    saved_path VARCHAR(500) NOT NULL,
+    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+-- Processed images table
+CREATE TABLE processed_images (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    upload_id INT NOT NULL,
+    output_path VARCHAR(500) NOT NULL,
+    processed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (upload_id) REFERENCES uploads(id) ON DELETE CASCADE
+);
+
+-- Masks table
+CREATE TABLE masks (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    processed_image_id INT NOT NULL,
+    mask_path VARCHAR(500) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (processed_image_id) REFERENCES processed_images(id) ON DELETE CASCADE
+);
+
+-- Downloads table
+CREATE TABLE downloads (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    processed_image_id INT NOT NULL,
+    downloaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (processed_image_id) REFERENCES processed_images(id) ON DELETE CASCADE
+);
+
 -- Insert default admin user (password: admin123)
-INSERT INTO users (name, email, password, role) VALUES 
-('Admin User', 'admin@bgremover.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin');
+INSERT INTO users (username, email, password_hash, is_admin) VALUES 
+('admin', 'admin@bgremover.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 1);
 
 -- Insert sample user (password: user123)
-INSERT INTO users (name, email, password, role) VALUES 
-('Demo User', 'user@demo.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'user');
+INSERT INTO users (username, email, password_hash, is_admin) VALUES 
+('demo_user', 'user@demo.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 0);
