@@ -1,6 +1,6 @@
 <?php
 session_start();
-require "./server/db.php";
+include_once "./server/db.php";
 
 // Redirect if already logged in
 if (isset($_SESSION['user_id'])) {
