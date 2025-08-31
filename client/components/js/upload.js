@@ -39,18 +39,37 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // File processing function
-  function processFile(file) {
-    if (!file.type.startsWith('image/')) {
-      alert('Please select a valid image file.');
-      return;
-    }
-
-    if (file.size > 10 * 1024 * 1024) {
-      alert('File size must be less than 10MB.');
-      return;
-    }
-
-    // You can add image preview or upload logic here
-    console.log('File ready to process:', file.name);
+ function processFile(file) {
+  if (!file.type.startsWith('image/')) {
+    alert('Please select a valid image file.');
+    return;
   }
+
+  if (file.size > 10 * 1024 * 1024) {
+    alert('File size must be less than 10MB.');
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  fetch("upload.php", {
+    method: "POST",
+    body: formData
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      alert("Upload successful!");
+      console.log("Saved path:", data.saved_path);
+    } else {
+      alert("Upload failed: " + data.message);
+    }
+  })
+  .catch(err => {
+    console.error("Error:", err);
+    alert("Server error.");
+  });
+}
+
 });

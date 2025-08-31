@@ -33,7 +33,7 @@
                     Transform your images instantly with our advanced AI-powered background removal tool. Professional results in seconds.
                 </p>
                 <div class="hero-cta">
-                    <a href="#upload" class="btn-primary">
+                    <a href="./login.php" class="btn-primary">
                         <i class="fas fa-upload"></i> Start Removing Backgrounds
                     </a>
                     <a href="#about" class="btn-secondary">
@@ -44,19 +44,19 @@
         </section>
 
         <!-- Upload Section -->
-        <section class="upload-section">
-            <div class="upload-container">
-                <div class="upload-area" onclick="document.getElementById('fileInput').click()" 
-                     ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
-                    <div class="upload-icon">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                    </div>
-                    <div class="upload-text">Drop your image here or click to browse</div>
-                    <div class="upload-subtext">Supports JPG, PNG, WEBP • Max 10MB</div>
-                </div>
-                <input type="file" id="fileInput" class="file-input" accept="image/*" onchange="handleFileSelect(event)">
-            </div>
-        </section>
+<section class="upload-section">
+  <div class="upload-container">
+    <div id="uploadArea" class="upload-area">
+      <div class="upload-icon">
+        <i class="fas fa-cloud-upload-alt"></i>
+      </div>
+      <div class="upload-text">Drop your image here or click to browse</div>
+      <div class="upload-subtext">Supports JPG, PNG, WEBP • Max 10MB</div>
+    </div>
+    <input type="file" id="fileInput" class="file-input" accept="image/*">
+  </div>
+</section>
+
 
         <!-- Processing Section (Visible by default, no hiding) -->
         <div id="processingContainer" class="container">
@@ -186,6 +186,7 @@
         </div>
     </div>
     <script src="../components/js/upload.js" defer></script>
+    <script src="../components/js/main.js" defer></script>
 
  
 </body>
