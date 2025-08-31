@@ -28,7 +28,7 @@
         <!-- Hero Section -->
         <section class="hero-section">
             <div class="hero-content">
-                <h1 class="hero-title">Remove Backgrounds with AI Magic</h1>
+                <h1 class="hero-title">Remove Backgrounds With Style In Seconds </h1>
                 <p class="hero-subtitle">
                     Transform your images instantly with our advanced AI-powered background removal tool. Professional results in seconds.
                 </p>

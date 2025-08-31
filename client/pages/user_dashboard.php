@@ -115,30 +115,32 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["image"])) {
 <body>
   <nav class="navbar">
     <div class="nav-container">
-      <a href="#" class="brand"><i class="fas fa-magic"></i> BG Remover Pro</a>
+      <a href="user_dashboard.php" class="brand"><i class="fas fa-magic"></i> BG Remover Pro</a>
       <div class="profile-wrapper">
         <div class="profile-circle" onclick="toggleDropdown()"><?= htmlspecialchars($initials) ?></div>
         <div class="dropdown" id="profileDropdown">
           <a href="user_uploads_dashboard.php">Dashboard</a>
           <a href="#">Settings</a>
-          <a href="logout.php">Logout</a>
+          <a href="./server/logout.php">Logout</a>
         </div>
       </div>
     </div>
   </nav>
 
-  <div class="upload-section">
-    <h2>Upload Your Image</h2>
-    <form method="post" enctype="multipart/form-data">
-      <input class="upload-input" type="file" name="image" accept="image/*" required>
-      <br><br>
-      <button type="submit" class="btn-primary"><i class="fas fa-upload"></i> Upload</button>
-    </form>
-    <?php if ($uploadMessage): ?>
-      <p class="message"><?= htmlspecialchars($uploadMessage) ?></p>
-    <?php endif; ?>
-  </div>
-
+    <!-- Upload Section -->
+        <section class="upload-section">
+            <div class="upload-container">
+                <div class="upload-area" onclick="document.getElementById('fileInput').click()" 
+                     ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+                    <div class="upload-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <div class="upload-text">Drop your image here or click to browse</div>
+                    <div class="upload-subtext">Supports JPG, PNG, WEBP • Max 10MB</div>
+                </div>
+                <input type="file" id="fileInput" class="file-input" accept="image/*" onchange="handleFileSelect(event)">
+            </div>
+        </section>
   <script>
     function toggleDropdown() {
         document.getElementById("profileDropdown").style.display =
