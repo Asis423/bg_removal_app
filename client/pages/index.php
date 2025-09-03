@@ -6,6 +6,7 @@
     <title>BG Remover Pro - AI Background Removal</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="../components/css/style.css" />
+    <link rel="stylesheet" href="../components/css/upload.css" />
 </head>
 <body>
     <nav class="navbar">
@@ -43,17 +44,29 @@
             </div>
         </section>
 
-        <!-- Upload Section -->
+<!-- Upload Section -->
 <section class="upload-section">
   <div class="upload-container">
-    <div id="uploadArea" class="upload-area">
+    <div class="upload-area" id="uploadArea">
       <div class="upload-icon">
         <i class="fas fa-cloud-upload-alt"></i>
       </div>
-      <div class="upload-text">Drop your image here or click to browse</div>
-      <div class="upload-subtext">Supports JPG, PNG, WEBP • Max 10MB</div>
+      <div class="upload-text">Drag & Drop or Click to Browse</div>
+      <div class="upload-subtext">Supports JPG, PNG, WEBP - Max 10MB</div>
     </div>
+
     <input type="file" id="fileInput" class="file-input" accept="image/*">
+
+    <div class="preview-container" id="previewContainer">
+      <div class="preview-title">Image Preview</div>
+      <img id="imagePreview" class="image-preview" src="" alt="Preview">
+    </div>
+
+    <button id="uploadButton" class="btn-upload" disabled>
+      <i class="fas fa-upload"></i> Upload Image
+    </button>
+
+    <div id="message" class="message"></div>
   </div>
 </section>
 
@@ -187,7 +200,128 @@
     </div>
     <script src="../components/js/upload.js" defer></script>
     <script src="../components/js/main.js" defer></script>
-
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+            const uploadButton = document.getElementById('uploadButton');
+            const previewContainer = document.getElementById('previewContainer');
+            const imagePreview = document.getElementById('imagePreview');
+            const messageDiv = document.getElementById('message');
+            
+            // Click on upload area to trigger file input
+            uploadArea.addEventListener('click', () => {
+                fileInput.click();
+            });
+            
+            // Drag and drop functionality
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                
+                if (e.dataTransfer.files.length) {
+                    fileInput.files = e.dataTransfer.files;
+                    handleFileSelection();
+                }
+            });
+            
+            // File input change event
+            fileInput.addEventListener('change', handleFileSelection);
+            
+            // Upload button click event
+            uploadButton.addEventListener('click', uploadImage);
+            
+            function handleFileSelection() {
+                const file = fileInput.files[0];
+                
+                if (file) {
+                    // Validate file type
+                    if (!file.type.match('image.*')) {
+                        showMessage('Please select a valid image file (JPG, PNG, WEBP).', 'error');
+                        resetForm();
+                        return;
+                    }
+                    
+                    // Validate file size (10MB max)
+                    if (file.size > 10 * 1024 * 1024) {
+                        showMessage('File size must be less than 10MB.', 'error');
+                        resetForm();
+                        return;
+                    }
+                    
+                    // Show preview
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        imagePreview.src = e.target.result;
+                        previewContainer.style.display = 'block';
+                        uploadButton.disabled = false;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+            
+            function uploadImage() {
+                const file = fileInput.files[0];
+                if (!file) return;
+                
+                const formData = new FormData();
+                formData.append('image', file);
+                
+                // Disable upload button during upload
+                uploadButton.disabled = true;
+                uploadButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+                
+                // Send to server
+                fetch('upload.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showMessage(data.message, 'success');
+                        resetForm();
+                    } else {
+                        showMessage(data.message, 'error');
+                        uploadButton.disabled = false;
+                        uploadButton.innerHTML = '<i class="fas fa-upload"></i> Upload Image';
+                    }
+                })
+                .catch(error => {
+                    showMessage('Upload failed: ' + error, 'error');
+                    uploadButton.disabled = false;
+                    uploadButton.innerHTML = '<i class="fas fa-upload"></i> Upload Image';
+                });
+            }
+            
+            function showMessage(message, type) {
+                messageDiv.textContent = message;
+                messageDiv.className = `message ${type}`;
+                messageDiv.style.display = 'block';
+                
+                // Auto hide after 5 seconds
+                setTimeout(() => {
+                    messageDiv.style.display = 'none';
+                }, 5000);
+            }
+            
+            function resetForm() {
+                fileInput.value = '';
+                previewContainer.style.display = 'none';
+                uploadButton.disabled = true;
+                uploadButton.innerHTML = '<i class="fas fa-upload"></i> Upload Image';
+            }
+        });
+    </script>
  
 </body>
 </html>
