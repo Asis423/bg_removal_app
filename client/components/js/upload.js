@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     startBtn.addEventListener('click', (e) => {
       e.preventDefault();
       document.getElementById('upload').scrollIntoView({ behavior: 'smooth' });
-    });
+    }); 
   }
 
   // Drag and drop listeners
@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const formData = new FormData();
-  formData.append("file", file);
+  formData.append("image", file);
 
   fetch("upload.php", {
     method: "POST",
