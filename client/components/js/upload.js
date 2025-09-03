@@ -58,14 +58,6 @@ document.addEventListener('DOMContentLoaded', () => {
     body: formData
   })
   .then(res => res.json())
-  .then(data => {
-    if (data.success) {
-      alert("Upload successful!");
-      console.log("Saved path:", data.saved_path);
-    } else {
-      alert("Upload failed: " + data.message);
-    }
-  })
   .catch(err => {
     console.error("Error:", err);
     alert("Server error.");

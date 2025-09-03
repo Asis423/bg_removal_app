@@ -274,7 +274,9 @@
                     // Show preview
                     const reader = new FileReader();
                     reader.onload = function(e) {
-                        imagePreview.src = e.target.result;
+    document.querySelectorAll('.preview-target').forEach(img => {
+        img.src = e.target.result;
+    });
                         previewContainer.style.display = 'block';
                         uploadButton.disabled = false;
                     };
