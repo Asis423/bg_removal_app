@@ -59,7 +59,7 @@
 
     <div class="preview-container" id="previewContainer">
       <div class="preview-title">Image Preview</div>
-      <img id="imagePreview" class="image-preview" src="" alt="Preview">
+      <img id="imagePreview" class="image-preview preview-target" src="" alt="Preview">
     </div>
 
     <button id="uploadButton" class="btn-upload" disabled>
@@ -89,7 +89,7 @@
                         <h3 class="step-title">Upload Complete</h3>
                         <p class="step-description">Your image has been uploaded successfully</p>
                         <div class="step-image">
-                            <img id="originalImage" alt="Original Image" />
+      <img id="imagePreview" class="image-preview preview-target" src="" alt="Preview">
                             <div class="step-loading">Waiting for upload...</div>
                         </div>
                     </div>
@@ -260,8 +260,12 @@
                     
                     // Show preview
                     const reader = new FileReader();
-                    reader.onload = function(e) {
-                        imagePreview.src = e.target.result;
+                   reader.onload = function(e) {
+         document.querySelectorAll('.preview-target').forEach(img => {
+              img.src = e.target.result;
+              const loadingText = img.parentElement.querySelector('.step-loading');
+      if (loadingText) loadingText.style.display = 'none';
+        }); 
                         previewContainer.style.display = 'block';
                         uploadButton.disabled = false;
                     };
@@ -279,7 +283,7 @@
                 // Disable upload button during upload
                 uploadButton.disabled = true;
                 uploadButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
-                
+                scrollToPreview();
                 // Send to server
                 fetch('upload.php', {
                     method: 'POST',
@@ -320,6 +324,13 @@
                 uploadButton.disabled = true;
                 uploadButton.innerHTML = '<i class="fas fa-upload"></i> Upload Image';
             }
+
+            function scrollToPreview() {
+  const previewSection = document.getElementById("processingContainer");
+  if (previewSection) {
+    previewSection.scrollIntoView({ behavior: "smooth" });
+  }
+}
         });
     </script>
  
