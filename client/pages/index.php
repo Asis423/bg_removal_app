@@ -89,7 +89,7 @@
                         <h3 class="step-title">Upload Complete</h3>
                         <p class="step-description">Your image has been uploaded successfully</p>
                         <div class="step-image">
-                            <img id="originalImage" alt="Original Image" />
+      <img id="imagePreview" class="image-preview" src="" alt="Preview">
                             <div class="step-loading">Waiting for upload...</div>
                         </div>
                     </div>
