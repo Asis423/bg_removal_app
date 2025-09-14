@@ -1,3 +1,15 @@
+<?php
+session_start();
+$initials = '';
+if (isset($_SESSION['username'])) {
+    $username = $_SESSION['username'];
+    $name_parts = explode(' ', $username);
+    $initials = strtoupper(substr($name_parts[0], 0, 1));
+    if (isset($name_parts[1])) {
+        $initials .= strtoupper(substr($name_parts[1], 0, 1));
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,103 +17,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>About | BG Remover Pro</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"/>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../components/css/dashboard.css" />
+     <link rel="stylesheet" href="../components/css/style.css" />
+    <link rel="stylesheet" href="../components/css/upload.css" /></style>
   <style>
-    :root {
-      --primary-blue: rgb(0, 64, 145);
-      --primary-orange: rgb(255, 140, 0);
-      --accent-blue: rgb(20, 84, 165);
-      --light-blue: rgb(240, 248, 255);
-      --dark-blue: rgb(0, 44, 105);
-      --orange-hover: rgb(235, 120, 0);
-      --success: rgb(34, 197, 94);
-      --error: rgb(239, 68, 68);
-      --warning: rgb(245, 158, 11);
-      --text-primary: rgb(15, 23, 42);
-      --text-secondary: rgb(71, 85, 105);
-      --text-muted: rgb(148, 163, 184);
-      --surface: rgb(255, 255, 255);
-      --surface-alt: rgb(248, 250, 252);
-      --border: rgb(226, 232, 240);
-      --border-light: rgb(241, 245, 249);
-      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-      --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Poppins', sans-serif;
-      background-color: var(--light-blue);
-      color: var(--text-primary);
-      line-height: 1.6;
-    }
-
-    .navbar {
-      background: var(--surface);
-      box-shadow: var(--shadow);
-      padding: 0.8rem 0;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-
-    .nav-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0 1.5rem;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      text-decoration: none;
-      color: var(--primary-blue);
-      font-weight: 700;
-      font-size: 1.4rem;
-    }
-
-    .brand-icon {
-      background: var(--primary-blue);
-      width: 40px;
-      height: 40px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-right: 10px;
-      color: white;
-    }
-
-    .nav-menu {
-      display: flex;
-      list-style: none;
-    }
-
-    .nav-link {
-      text-decoration: none;
-      color: var(--text-secondary);
-      font-weight: 500;
-      padding: 0.5rem 1rem;
-      margin: 0 0.2rem;
-      border-radius: 6px;
-      transition: all 0.3s ease;
-    }
-
-    .nav-link:hover, .nav-link.active {
-      color: var(--primary-blue);
-      background-color: rgba(0, 64, 145, 0.1);
-    }
-
     .about-hero {
       background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-blue) 100%);
       color: white;
@@ -330,20 +249,32 @@
   </style>
 </head>
 <body>
-  <nav class="navbar">
-    <div class="nav-container">
-      <a href="index.php" class="brand">
-        <div class="brand-icon"><i class="fas fa-magic"></i></div>
-        BG Remover Pro
-      </a>
-      <ul class="nav-menu">
-        <li><a class="nav-link" href="index.php">Home</a></li>
-        <li><a class="nav-link active" href="about.php">About</a></li>
-        <li><a class="nav-link" href="login.php">Login</a></li>
-        <li><a class="nav-link" href="register.php">Sign Up</a></li>
-      </ul>
-    </div>
-  </nav>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.php" class="brand">
+                <div class="brand-icon"><i class="fas fa-magic"></i></div>
+                BG Remover Pro
+            </a>
+            <ul class="nav-menu">
+                <li><a class="nav-link" href="index.php">Home</a></li>
+                <li><a class="nav-link" href="about.php">About</a></li>
+                <?php if (isset($_SESSION['user_id'])): ?>
+                    <li class="profile-wrapper">
+                        <div class="profile-circle"><?= htmlspecialchars($initials) ?></div>
+                        <div class="dropdown">
+                            <a href="user_dashboard.php">Dashboard</a>
+                            <a href="settings.php">Settings</a>
+                            <a href="./server/logout.php">Logout</a>
+                        </div>
+                    </li>
+
+                <?php else: ?>
+                    <li><a class="nav-link" href="login.php">Login</a></li>
+                    <li><a class="nav-link" href="register.php">Sign Up</a></li>
+                <?php endif; ?>
+            </ul>
+        </div>
+    </nav>
 
   <section class="about-hero">
     <h1>About BG Remover Pro</h1>

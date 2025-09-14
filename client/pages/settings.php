@@ -177,7 +177,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             border-radius: 4px;
             transition: background 0.3s;
         }
-        
+        .logout{
+            color: white;
+            background-color: var(--primary-orange);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
         .nav-link:hover {
             background: rgba(255,255,255,0.1);
         }
@@ -351,7 +358,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <?php else: ?>
                     <li><a class="nav-link" href="user_dashboard.php">Dashboard</a></li>
                 <?php endif; ?>
-                <li><a class="nav-link" href="logout.php">Logout</a></li>
+                <li><a class="nav-link logout" href="./server/logout.php">Logout</a></li>
             </ul>
         </div>
     </nav>
