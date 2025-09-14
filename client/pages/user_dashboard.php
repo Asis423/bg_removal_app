@@ -110,17 +110,34 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["image"])) {
     }
     .message { margin-top: 1rem; color: green; font-weight: bold; }
     .error { color: red; }
+    .nav-link {
+        color: white;
+    }
+    .nav-link:hover{
+        color:black;
+        background: var(--light-blue);
+    }
+    .nav-menu{
+        flex: content;
+        justify-content: end;
+        margin-right: 10px;
+    }
   </style>
 </head>
 <body>
   <nav class="navbar">
     <div class="nav-container">
+        
       <a href="user_dashboard.php" class="brand"><i class="fas fa-magic"></i> BG Remover Pro</a>
+        <ul class="nav-menu">
+            <li><a class="nav-link" href="index.php">Home</a></li>
+            <li><a class="nav-link" href="about.php">About</a></li>
+        </ul>
       <div class="profile-wrapper">
         <div class="profile-circle" onclick="toggleDropdown()"><?= htmlspecialchars($initials) ?></div>
         <div class="dropdown" id="profileDropdown">
           <a href="user_uploads_dashboard.php">Dashboard</a>
-          <a href="#">Settings</a>
+          <a href="settings.php">Settings</a>
           <a href="./server/logout.php">Logout</a>
         </div>
       </div>

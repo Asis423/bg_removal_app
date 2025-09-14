@@ -24,7 +24,7 @@ if (isset($_SESSION['username'])) {
 <body>
     <nav class="navbar">
         <div class="nav-container">
-            <a href="#" class="brand">
+            <a href="index.php" class="brand">
                 <div class="brand-icon"><i class="fas fa-magic"></i></div>
                 BG Remover Pro
             </a>
@@ -62,7 +62,7 @@ if (isset($_SESSION['username'])) {
                     <a href="./login.php" class="btn-primary"  onclick="scrollToUpload()">
                         <i class="fas fa-upload"></i> Start Removing Backgrounds
                     </a>
-                    <a href="#about" class="btn-secondary">
+                    <a href="about.php" class="btn-secondary">
                         <i class="fas fa-play"></i> Learn More
                     </a>
                 </div>
