@@ -1,3 +1,15 @@
+<?php
+session_start();
+$initials = '';
+if (isset($_SESSION['username'])) {
+    $username = $_SESSION['username'];
+    $name_parts = explode(' ', $username);
+    $initials = strtoupper(substr($name_parts[0], 0, 1));
+    if (isset($name_parts[1])) {
+        $initials .= strtoupper(substr($name_parts[1], 0, 1));
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,6 +19,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="../components/css/style.css" />
     <link rel="stylesheet" href="../components/css/upload.css" />
+    <link rel="stylesheet" href="../components/css/dashboard.css" />
 </head>
 <body>
     <nav class="navbar">
@@ -16,10 +29,22 @@
                 BG Remover Pro
             </a>
             <ul class="nav-menu">
-                <li><a class="nav-link" href="#home">Home</a></li>
-                <li><a class="nav-link" href="#about">About</a></li>
-                <li><a class="nav-link" href="login.php">Login</a></li>
-                <li><a class="nav-link" href="register.php">Sign Up</a></li>
+                <li><a class="nav-link" href="index.php">Home</a></li>
+                <li><a class="nav-link" href="about.php">About</a></li>
+                <?php if (isset($_SESSION['user_id'])): ?>
+                   <li class="profile-wrapper">
+  <div class="profile-circle"><?= htmlspecialchars($initials) ?></div>
+  <div class="dropdown">
+    <a href="user_dashboard.php">Dashboard</a>
+    <a href="settings.php">Settings</a>
+    <a href="./server/logout.php">Logout</a>
+  </div>
+</li>
+
+                <?php else: ?>
+                    <li><a class="nav-link" href="login.php">Login</a></li>
+                    <li><a class="nav-link" href="register.php">Sign Up</a></li>
+                <?php endif; ?>
             </ul>
         </div>
     </nav>
@@ -335,8 +360,17 @@
   if (previewSection) {
     previewSection.scrollIntoView({ behavior: "smooth" });
   }
+} 
+function toggleDropdown() {
+    document.getElementById("profileDropdown").style.display =
+        document.getElementById("profileDropdown").style.display === "block" ? "none" : "block";
 }
-        });
+window.onclick = function(event) {
+    if (!event.target.closest('.profile-wrapper')) {
+        document.getElementById("profileDropdown").style.display = "none";
+    }
+}
+
     </script>
  
 </body>
