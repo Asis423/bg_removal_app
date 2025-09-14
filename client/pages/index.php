@@ -34,7 +34,7 @@
                     Transform your images instantly with our advanced AI-powered background removal tool. Professional results in seconds.
                 </p>
                 <div class="hero-cta">
-                    <a href="./login.php" class="btn-primary">
+                    <a href="./login.php" class="btn-primary"  onclick="scrollToUpload()">
                         <i class="fas fa-upload"></i> Start Removing Backgrounds
                     </a>
                     <a href="#about" class="btn-secondary">
@@ -324,7 +324,12 @@
                 uploadButton.disabled = true;
                 uploadButton.innerHTML = '<i class="fas fa-upload"></i> Upload Image';
             }
-
+            function scrollToUpload(){
+                const uploadSection = document.querySelector("upload-section");
+                if (uploadSection) {
+                    uploadSection.scrollIntoView({ behavior: "smooth" });
+                }
+            }
             function scrollToPreview() {
   const previewSection = document.getElementById("processingContainer");
   if (previewSection) {

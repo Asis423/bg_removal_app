@@ -242,18 +242,31 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["image"])) {
         </div>
         
         <!-- Upload Section -->
-        <section class="upload-section">
-            <h2>Upload Your Image</h2>
-            <form method="post" enctype="multipart/form-data">
-                <input class="upload-input" type="file" name="image" accept="image/*" required>
-                <br><br>
-                <button type="submit" class="btn-primary"><i class="fas fa-upload"></i> Upload</button>
-            </form>
-            <?php if ($uploadMessage): ?>
-                <p class="message"><?= htmlspecialchars($uploadMessage) ?></p>
-            <?php endif; ?>
-        </section>
-        
+
+<section class="upload-section">
+  <div class="upload-container">
+    <div class="upload-area" id="uploadArea">
+      <div class="upload-icon">
+        <i class="fas fa-cloud-upload-alt"></i>
+      </div>
+      <div class="upload-text">Drag & Drop or Click to Browse</div>
+      <div class="upload-subtext">Supports JPG, PNG, WEBP - Max 10MB</div>
+    </div>
+
+    <input type="file" id="fileInput" class="file-input" accept="image/*">
+
+    <div class="preview-container" id="previewContainer">
+      <div class="preview-title">Image Preview</div>
+      <img id="imagePreview" class="image-preview preview-target" src="" alt="Preview">
+    </div>
+
+    <button id="uploadButton" class="btn-upload" disabled>
+      <i class="fas fa-upload"></i> Upload Image
+    </button>
+
+    <div id="message" class="message"></div>
+  </div>
+</section>
         <!-- Recent Uploads Section -->
         <section class="uploads-section">
             <h2>Recent Uploads</h2>
