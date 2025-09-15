@@ -249,32 +249,7 @@ if (isset($_SESSION['username'])) {
   </style>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="nav-container">
-            <a href="index.php" class="brand">
-                <div class="brand-icon"><i class="fas fa-magic"></i></div>
-                BG Remover Pro
-            </a>
-            <ul class="nav-menu">
-                <li><a class="nav-link" href="index.php">Home</a></li>
-                <li><a class="nav-link" href="about.php">About</a></li>
-                <?php if (isset($_SESSION['user_id'])): ?>
-                    <li class="profile-wrapper">
-                        <div class="profile-circle"><?= htmlspecialchars($initials) ?></div>
-                        <div class="dropdown">
-                            <a href="user_dashboard.php">Dashboard</a>
-                            <a href="settings.php">Settings</a>
-                            <a href="./server/logout.php">Logout</a>
-                        </div>
-                    </li>
-
-                <?php else: ?>
-                    <li><a class="nav-link" href="login.php">Login</a></li>
-                    <li><a class="nav-link" href="register.php">Sign Up</a></li>
-                <?php endif; ?>
-            </ul>
-        </div>
-    </nav>
+   <?php include('components/navbar.php'); ?>
 
   <section class="about-hero">
     <h1>About BG Remover Pro</h1>
