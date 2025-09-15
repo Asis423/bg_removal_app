@@ -1,0 +1,40 @@
+ .process-step {
+            text-align: center;
+            margin: 20px auto;
+            max-width: 600px;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .step-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 10px;
+        }
+        .step-title {
+            font-size: 20px;
+            margin: 10px 0;
+            font-weight: 600;
+        }
+        .step-description {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 20px;
+        }
+        .step-image {
+            margin-top: 20px;
+        }
+        .step-image img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+        }
+        .step-loading {
+            font-size: 16px;
+            color: #888;
+        }
+        #processedImage {
+            display: none;
+        }

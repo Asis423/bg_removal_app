@@ -18,10 +18,13 @@ if (isset($_SESSION['username'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>BG Remover Pro - AI Background Removal</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
-      <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../components/css/style.css" />
     <link rel="stylesheet" href="../components/css/upload.css" />
     <link rel="stylesheet" href="../components/css/dashboard.css" />
+    <style>
+       
+    </style>
 </head>
 
 <body>
@@ -47,12 +50,6 @@ if (isset($_SESSION['username'])) {
                 <?php else: ?>
                     <li><a class="nav-link" href="login.php">Login</a></li>
                     <li><a class="nav-link" href="register.php">Sign Up</a></li>
-                    <nav>
-  <a id="auth-link" href="#" onclick="showLogin()">Login / Register</a>
-  <a id="admin-link" href="#" style="display:none;">Admin Panel</a>
-  <a id="logout-link" href="#" style="display:none;" onclick="logout()">Logout</a>
-</nav>
-
                 <?php endif; ?>
             </ul>
         </div>
@@ -94,7 +91,6 @@ if (isset($_SESSION['username'])) {
                 <div id="message" class="message"></div>
             </div>
         </section>
-
 
         <!-- Processing Section (Visible by default, no hiding) -->
         <div id="processingContainer" class="container">
@@ -144,20 +140,86 @@ if (isset($_SESSION['username'])) {
                 </div>
 
                 <!-- Resolution Selection (Always visible) -->
-              <div id="resolutionContainer" class="resolution-container hidden">
-    <h3>Select Resolution</h3>
-    <div class="resolution-options"></div>
-    <div class="download-actions">
-        <button class="btn-download" onclick="downloadImage()">
-            <i class="fas fa-download"></i> Download Image
-        </button>
-        <button class="btn-reset" onclick="resetProcessor()">
-            <i class="fas fa-refresh"></i> Process Another
-        </button>
-    </div>
-</div>
+                <div id="resolutionContainer" class="resolution-container hidden">
+                    <h3>Select Resolution</h3>
+                    <div class="resolution-options"></div>
+                    <div class="download-actions">
+                        <button class="btn-download" onclick="downloadImage()">
+                            <i class="fas fa-download"></i> Download Image
+                        </button>
+                        <button class="btn-reset" onclick="resetProcessor()">
+                            <i class="fas fa-refresh"></i> Process Another
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
+
+        <!-- Latest Processed Image Display (Optional - shows if upload_id is provided in URL) -->
+        <?php
+        // Database connection for latest processed image
+        $host = "localhost";
+        $dbname = "bg_removal_app";
+        $user = "root";
+        $pass = "";
+        $imagePath = '';
+        $imageExists = false;
+
+        try {
+            $pdo = new PDO(
+                "mysql:host=$host;dbname=$dbname;charset=utf8",
+                $user,
+                $pass,
+                [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+            );
+
+            // Get upload_id from query parameter
+            $upload_id = isset($_GET['upload_id']) ? intval($_GET['upload_id']) : 0;
+
+            if ($upload_id > 0) {
+                // Query for specific upload_id
+                $stmt = $pdo->prepare("SELECT output_path FROM processed_images WHERE upload_id = ? ORDER BY processed_at DESC LIMIT 1");
+                $stmt->execute([$upload_id]);
+                $processed = $stmt->fetch(PDO::FETCH_ASSOC);
+                
+                if ($processed) {
+                    $imagePath = "http://localhost/frontend/client/pages/processed/" . basename($processed['output_path']);
+                    $imageExists = true;
+                }
+            } else {
+                // Fallback: Get the latest processed image
+                $stmt = $pdo->prepare("SELECT output_path FROM processed_images ORDER BY processed_at DESC LIMIT 1");
+                $stmt->execute();
+                $processed = $stmt->fetch(PDO::FETCH_ASSOC);
+                
+                if ($processed) {
+                    $imagePath = "http://localhost/frontend/client/pages/processed/" . basename($processed['output_path']);
+                    $imageExists = true;
+                }
+            }
+        } catch (Exception $e) {
+            error_log("Database connection failed: " . $e->getMessage());
+        }
+        ?>
+
+        <?php if ($imageExists): ?>
+        <div class="container" style="margin-top: 40px;">
+            <h3 style="text-align: center; margin-bottom: 20px;">Latest Processed Image</h3>
+            <div class="process-step" id="latestStep3">
+                <div class="step-number">3</div>
+                <h3 class="step-title">Background Removal Complete</h3>
+                <p class="step-description">Your processed image is ready!</p>
+                <div class="step-image">
+                    <img id="latestProcessedImage" src="<?php echo htmlspecialchars($imagePath); ?>" alt="Latest Processed Image" style="display:block; max-width: 100%; height: auto; border-radius: 4px;" />
+                </div>
+                <div style="text-align: center; margin-top: 15px;">
+                    <a href="<?php echo htmlspecialchars($imagePath); ?>" download class="btn-primary" style="display: inline-block; padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 4px;">
+                        <i class="fas fa-download"></i> Download Image
+                    </a>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
     </div>
 
     <div id="about" class="page-section">
@@ -214,167 +276,467 @@ if (isset($_SESSION['username'])) {
             </table>
         </div>
     </div>
-    <script src="../components/js/upload.js" defer></script>
-    <script src="../components/js/main.js" defer></script>
+
     <script>
+        // Global variables
+        let currentUser = null;
+        let processedImageData = null;
+        let selectedResolution = '1'; // default original
+        let currentUploadId = null;
+        let isUploading = false;
+        let pollInterval = null;
+
+        // Page navigation
+        function showPage(pageId) {
+            document.querySelectorAll('.page-section').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById(pageId).classList.add('active');
+
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                if (link.textContent.toLowerCase().includes(pageId.toLowerCase()) ||
+                    (pageId === 'home' && link.textContent === 'Home')) {
+                    link.classList.add('active');
+                }
+            });
+        }
+
+        // Authentication
+        function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            fetch('login.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        currentUser = data.user;
+                        updateAuthUI();
+                        if (data.user.role === 'admin') {
+                            showPage('admin');
+                            alert('Welcome back, Admin!');
+                        } else {
+                            showPage('home');
+                            alert('Login successful!');
+                        }
+                    } else {
+                        alert(data.message || 'Login failed');
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Server error during login.');
+                });
+        }
+
+        function handleRegister(event) {
+            event.preventDefault();
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+
+            fetch('signup.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
+            })
+                .then(response => {
+                    if (response.redirected) {
+                        window.location.href = response.url;
+                    } else {
+                        return response.text();
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Server error during registration.');
+                });
+        }
+
+        function updateAuthUI() {
+            const authLink = document.getElementById('auth-link');
+            const adminLink = document.getElementById('admin-link');
+            const logoutLink = document.getElementById('logout-link');
+
+            if (!authLink || !adminLink || !logoutLink) {
+                console.warn("Auth UI elements not found in DOM");
+                return;
+            }
+
+            if (currentUser) {
+                authLink.style.display = 'none';
+                logoutLink.style.display = 'inline-flex';
+                if (currentUser.role === 'admin') {
+                    adminLink.style.display = 'block';
+                }
+            } else {
+                authLink.style.display = 'block';
+                adminLink.style.display = 'none';
+                logoutLink.style.display = 'none';
+            }
+        }
+
+        function showLogin() { showPage('login'); }
+        function showRegister() { showPage('register'); }
+
+        // Scroll to upload
+        function scrollToUpload() {
+            showPage('home');
+            setTimeout(() => {
+                document.querySelector('.upload-section').scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+        }
+
+        // Drag-drop
+        function handleDrop(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            const uploadArea = event.currentTarget;
+            uploadArea.classList.remove('dragover');
+            const files = event.dataTransfer.files;
+            if (files.length > 0) processFile(files[0]);
+        }
+        function handleDragOver(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            event.currentTarget.classList.add('dragover');
+        }
+        function handleDragLeave(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            event.currentTarget.classList.remove('dragover');
+        }
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) processFile(file);
+        }
+
+        // Upload & process
+        // ==========================
+        // File Upload & Processing
+        // ==========================
+        function processFile(file) {
+            if (isUploading) return; // prevent double upload
+            isUploading = true;
+
+            if (!file.type.startsWith('image/')) {
+                alert('Please select a valid image file.');
+                isUploading = false;
+                return;
+            }
+
+            if (file.size > 10 * 1024 * 1024) {
+                alert('File size must be less than 10MB.');
+                isUploading = false;
+                return;
+            }
+
+            // Show Step 1 preview
+            const reader = new FileReader();
+            reader.onload = e => {
+                const img = document.getElementById('imagePreview');
+                img.src = e.target.result;
+                img.style.display = 'block';
+                document.getElementById('step1').classList.add('completed');
+            };
+            reader.readAsDataURL(file);
+
+            // Upload to PHP
+            const formData = new FormData();
+            formData.append('image', file);
+
+            fetch('upload.php', { method: 'POST', body: formData })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        currentUploadId = data.upload_id;
+                        pollProcessing(currentUploadId);
+                    } else {
+                        alert(data.message || 'Upload failed.');
+                        isUploading = false;
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Error uploading image.');
+                    isUploading = false;
+                });
+        }
+
+        // ==========================
+        // Dynamic Resolution Cards
+        // ==========================
+        function showDynamicResolutions(img) {
+            const createResolutionOptions = function() {
+                const w = img.naturalWidth;
+                const h = img.naturalHeight;
+
+                const container = document.querySelector('.resolution-options');
+                if (!container) return;
+
+                container.innerHTML = `
+                    <div class="resolution-card selected" data-scale="1" tabindex="0">
+                        <div class="resolution-label">Original</div>
+                        <div class="resolution-size">${w} x ${h}</div>
+                    </div>
+                    <div class="resolution-card" data-scale="0.75" tabindex="0">
+                        <div class="resolution-label">75% Quality</div>
+                        <div class="resolution-size">${Math.round(w*0.75)} x ${Math.round(h*0.75)}</div>
+                    </div>
+                    <div class="resolution-card" data-scale="0.5" tabindex="0">
+                        <div class="resolution-label">50% Quality</div>
+                        <div class="resolution-size">${Math.round(w*0.5)} x ${Math.round(h*0.5)}</div>
+                    </div>
+                `;
+
+                const cards = container.querySelectorAll('.resolution-card');
+                cards.forEach(card => {
+                    card.addEventListener('click', function() {
+                        cards.forEach(c => c.classList.remove('selected'));
+                        this.classList.add('selected');
+                        selectedResolution = this.dataset.scale;
+                    });
+                });
+
+                container.style.display = 'block';
+            };
+
+            if (img.complete && img.naturalWidth !== 0) {
+                createResolutionOptions();
+            } else {
+                img.onload = createResolutionOptions;
+            }
+        }
+
+        // ==========================
+        // Download Image
+        // ==========================
+        function downloadImage() {
+            if (!processedImageData) {
+                alert('No processed image available.');
+                return;
+            }
+
+            const link = document.createElement('a');
+            link.download = `bg-removed-${Date.now()}.png`;
+            link.href = processedImageData;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // Optional: Send download info to DB
+            fetch('log_download.php', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: `processed_image_url=${encodeURIComponent(processedImageData)}&user_id=${currentUser ? currentUser.id : 0}`
+            });
+
+            alert('Image downloaded successfully!');
+        }
+
+        function resetProcessor() {
+            document.getElementById('processingContainer').classList.add('hidden');
+            document.getElementById('resolutionContainer').classList.add('hidden');
+            document.querySelectorAll('.process-step').forEach(step => {
+                step.classList.remove('active', 'completed');
+            });
+            document.getElementById('progressBar').style.width = '0%';
+            document.getElementById('originalImage').style.display = 'none';
+            document.getElementById('processedImage').style.display = 'none';
+            document.getElementById('analysisSpinner').style.display = 'none';
+            document.querySelectorAll('.step-loading').forEach((loading, index) => {
+                const texts = ['Waiting for upload...', 'Ready for analysis...', 'Awaiting processing...'];
+                loading.textContent = texts[index];
+                loading.style.display = 'block';
+            });
+            document.getElementById('fileInput').value = '';
+            processedImageData = null;
+        }
+
+        // Admin stats
+        function updateAdminStats() {
+            if (!currentUser || currentUser.role !== 'admin') return;
+            const stats = {
+                totalUsers: Math.floor(Math.random() * 100) + 1200,
+                imagesProcessed: Math.floor(Math.random() * 1000) + 15000,
+                activeToday: Math.floor(Math.random() * 50) + 50,
+                successRate: (98 + Math.random() * 2).toFixed(1) + '%'
+            };
+            Object.keys(stats).forEach(key => {
+                const element = document.getElementById(key);
+                if (element) element.textContent = stats[key];
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
+            updateAuthUI();
+            setInterval(updateAdminStats, 30000);
+
+            // Handle latest processed image if exists
+            const latestProcessedImage = document.getElementById('latestProcessedImage');
+            if (latestProcessedImage) {
+                latestProcessedImage.onload = function() {
+                    console.log('Latest processed image loaded successfully');
+                };
+                latestProcessedImage.onerror = function() {
+                    console.error('Failed to load latest processed image');
+                    this.parentElement.innerHTML = '<p style="color: #ff0000;">Error loading latest processed image.</p>';
+                };
+            }
+
+            // Initialize upload functionality
             const uploadArea = document.getElementById('uploadArea');
             const fileInput = document.getElementById('fileInput');
-            const uploadButton = document.getElementById('uploadButton');
-            const previewContainer = document.getElementById('previewContainer');
-            const imagePreview = document.getElementById('imagePreview');
-            const messageDiv = document.getElementById('message');
-
+            
             // Click on upload area to trigger file input
             uploadArea.addEventListener('click', () => {
                 fileInput.click();
             });
 
             // Drag and drop functionality
-            uploadArea.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                uploadArea.classList.add('dragover');
-            });
-
-            uploadArea.addEventListener('dragleave', () => {
-                uploadArea.classList.remove('dragover');
-            });
-
-            uploadArea.addEventListener('drop', (e) => {
-                e.preventDefault();
-                uploadArea.classList.remove('dragover');
-
-                if (e.dataTransfer.files.length) {
-                    fileInput.files = e.dataTransfer.files;
-                    handleFileSelection();
-                }
-            });
+            uploadArea.addEventListener('dragover', handleDragOver);
+            uploadArea.addEventListener('dragleave', handleDragLeave);
+            uploadArea.addEventListener('drop', handleDrop);
+            fileInput.addEventListener('change', handleFileSelect);
         });
-            // File input change event
-            fileInput.addEventListener('change', handleFileSelection);
 
-            // Upload button click event
-            uploadButton.addEventListener('click', uploadImage);
+        function pollProcessing(uploadId) {
+            const interval = setInterval(async () => {
+                try {
+                    const response = await fetch(`check_status.php?upload_id=${uploadId}`);
+                    const result = await response.json();
+                    console.log('Polling result:', result); // Debug log
 
-            function handleFileSelection() {
-                const file = fileInput.files[0];
+                    if (result.success) {
+                        const step2 = document.getElementById('step2');
+                        const step3 = document.getElementById('step3');
+                        const processedImage = document.getElementById('processedImage');
+                        
+                        // Use more robust element selection
+                        const step3Loading = document.querySelector('#step3 .step-loading') || 
+                                            document.getElementById('step3Loading');
 
-                if (file) {
-                    // Validate file type
-                    if (!file.type.match('image.*')) {
-                        showMessage('Please select a valid image file (JPG, PNG, WEBP).', 'error');
-                        resetForm();
-                        return;
-                    }
-
-                    // Validate file size (10MB max)
-                    if (file.size > 10 * 1024 * 1024) {
-                        showMessage('File size must be less than 10MB.', 'error');
-                        resetForm();
-                        return;
-                    }
-
-                    // Show preview
-                    const reader = new FileReader();
-                    reader.onload = function (e) {
-                        document.querySelectorAll('.preview-target').forEach(img => {
-                            img.src = e.target.result;
-                            const loadingText = img.parentElement.querySelector('.step-loading');
-                            if (loadingText) loadingText.style.display = 'none';
-                        });
-                        previewContainer.style.display = 'block';
-                        uploadButton.disabled = false;
-                    };
-                    scrollToPreview();
-                    reader.readAsDataURL(file);
-                }
-            }
-
-            function uploadImage() {
-                const file = fileInput.files[0];
-                if (!file) return;
-
-                const formData = new FormData();
-                formData.append('image', file);
-
-                // Disable upload button during upload
-                uploadButton.disabled = true;
-                uploadButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
-                
-                // Send to server
-                fetch('upload.php', {
-                    method: 'POST',
-                    body: formData
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            showMessage(data.message, 'success');
-                            // Start polling for processed image
-                          pollProcessing(data.upload_id);
-                        } else {
-                            showMessage(data.message, 'error');
-                            uploadButton.disabled = false;
-                            uploadButton.innerHTML = '<i class="fas fa-upload"></i> Upload Image';
+                        if (result.data.status === "processing") {
+                            step2.classList.add("active");
+                            const step2Desc = step2.querySelector(".step-description");
+                            if (step2Desc) step2Desc.textContent = "Analyzing image...";
                         }
-                    })
-                    .catch(error => {
-                        showMessage('Upload failed: ' + error, 'error');
-                        uploadButton.disabled = false;
-                        uploadButton.innerHTML = '<i class="fas fa-upload"></i> Upload Image';
+
+                        if (result.data.status === "completed") {
+                            clearInterval(interval);
+                            console.log('Processing completed!'); // Debug log
+
+                            // Update step 2
+                            step2.classList.remove("active");
+                            step2.classList.add("completed");
+                            const step2Desc = step2.querySelector(".step-description");
+                            if (step2Desc) step2Desc.textContent = "Analysis complete!";
+
+                            // Update step 3
+                            step3.classList.add("active");
+                            const step3Desc = step3.querySelector(".step-description");
+                            if (step3Desc) step3Desc.textContent = "Background removed!";
+                            
+                            // Hide loading and show image
+                            if (step3Loading) step3Loading.style.display = "none";
+                            
+                            // Set image source and make sure it's visible
+                            processedImage.src = result.data.processed_image_url;
+                            processedImage.style.display = "block";
+                            processedImage.onload = function() {
+                                console.log('Processed image loaded successfully');
+                            };
+                            processedImage.onerror = function() {
+                                console.error('Failed to load processed image');
+                                if (step3Loading) {
+                                    step3Loading.style.display = "block";
+                                    step3Loading.textContent = "Error loading image";
+                                }
+                            };
+
+                            // Show resolution options
+                            showDynamicResolutions(processedImage);
+                            
+                            // Store the processed image data for download
+                            processedImageData = result.data.processed_image_url;
+                            
+                            // Show download section
+                            const resolutionContainer = document.getElementById("resolutionContainer");
+                            if (resolutionContainer) resolutionContainer.classList.remove("hidden");
+                        }
+                    } else {
+                        clearInterval(interval);
+                        showMessage("Error: " + (result.message || 'Unknown error'), "error");
+                    }
+                } catch (error) {
+                    clearInterval(interval);
+                    showMessage("Error polling status: " + error.message, "error");
+                    console.error('Polling error:', error);
+                }
+            }, 3000); // Check every 3 seconds
+        }
+
+        function showDynamicResolutions(img) {
+            img.onload = function() {
+                const w = img.naturalWidth;
+                const h = img.naturalHeight;
+
+                const container = document.querySelector('.resolution-options');
+                container.innerHTML = `
+                    <div class="resolution-card selected" data-scale="1" tabindex="0">
+                        <div class="resolution-label">Original</div>
+                        <div class="resolution-size">${w} x ${h}</div>
+                    </div>
+                    <div class="resolution-card" data-scale="0.75" tabindex="0">
+                        <div class="resolution-label">75% Quality</div>
+                        <div class="resolution-size">${Math.round(w*0.75)} x ${Math.round(h*0.75)}</div>
+                    </div>
+                    <div class="resolution-card" data-scale="0.5" tabindex="0">
+                        <div class="resolution-label">50% Quality</div>
+                        <div class="resolution-size">${Math.round(w*0.5)} x ${Math.round(h*0.5)}</div>
+                    </div>
+                `;
+
+                // Add click event for selection
+                const cards = container.querySelectorAll('.resolution-card');
+                cards.forEach(card => {
+                    card.addEventListener('click', function() {
+                        cards.forEach(c => c.classList.remove('selected'));
+                        this.classList.add('selected');
+                        selectedResolution = this.dataset.scale;
                     });
-            }
+                });
+            };
+        }
 
-            function showMessage(message, type) {
-                messageDiv.textContent = message;
-                messageDiv.className = `message ${type}`;
-                messageDiv.style.display = 'block';
-
-                // Auto hide after 5 seconds
-                setTimeout(() => {
-                    messageDiv.style.display = 'none';
-                }, 5000);
+        function showMessage(message, type) {
+            // Create or find message element
+            let messageDiv = document.getElementById('message');
+            if (!messageDiv) {
+                messageDiv = document.createElement('div');
+                messageDiv.id = 'message';
+                document.body.appendChild(messageDiv);
             }
+            
+            messageDiv.textContent = message;
+            messageDiv.className = `message ${type}`;
+            messageDiv.style.display = 'block';
 
-            function resetForm() {
-                fileInput.value = '';
-                previewContainer.style.display = 'none';
-                uploadButton.disabled = true;
-                uploadButton.innerHTML = '<i class="fas fa-upload"></i> Upload Image';
-            }
-            function scrollToUpload() {
-                const uploadSection = document.querySelector(".upload-section");
-                if (uploadSection) {
-                    uploadSection.scrollIntoView({ behavior: "smooth" });
-                }
-            }
-            function scrollToPreview() {
-                const previewSection = document.getElementById("processingContainer");
-                if (previewSection) {
-                    previewSection.scrollIntoView({ behavior: "smooth" });
-                }
-            }
-            function showMessage(message, type) {
-    // Create or find message element
-    let messageDiv = document.getElementById('message');
-    if (!messageDiv) {
-        messageDiv = document.createElement('div');
-        messageDiv.id = 'message';
-        document.body.appendChild(messageDiv);
-    }
-    
-    messageDiv.textContent = message;
-    messageDiv.className = `message ${type}`;
-    messageDiv.style.display = 'block';
-
-    // Auto hide after 5 seconds
-    setTimeout(() => {
-        messageDiv.style.display = 'none';
-    }, 5000);
-}
-
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 5000);
+        }
     </script>
-
 </body>
 
 </html>
