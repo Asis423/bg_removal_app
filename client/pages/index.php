@@ -128,7 +128,11 @@ if (isset($_SESSION['username'])) {
                         <h3 class="step-title">AI Analysis</h3>
                         <p class="step-description">Analyzing image content and detecting subjects</p>
                         <div class="step-image">
-                            <div class="step-loading">Ready for analysis...</div>
+                            <!-- Magic visual placeholder -->
+                            <div class="magic-loader" id="magicLoader">
+                                <span></span><span></span><span></span><span></span>
+                            </div>
+                            <div class="step-loading">Analyzing...</div>
                         </div>
                     </div>
 
@@ -137,29 +141,15 @@ if (isset($_SESSION['username'])) {
                         <h3 class="step-title">Background Removal</h3>
                         <p class="step-description">Removing background with precision AI algorithms</p>
                         <div class="step-image">
-                            <img id="processedImage" alt="Processed Image" />
-                            <div class="step-loading">Awaiting processing...</div>
+                            <img id="processedImage" alt="Processed Image" style="display:none;" />
+                            <div class="step-loading" id="step3Loading">Waiting for processing...</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Resolution Selection (Always visible) -->
-                <div id="resolutionContainer" class="resolution-section">
-                    <h3 class="resolution-title">Choose Output Resolution</h3>
-                    <div class="resolution-options">
-                        <div class="resolution-card selected" data-resolution="original" tabindex="0">
-                            <div class="resolution-label">Original</div>
-                            <div class="resolution-size">Keep original size</div>
-                        </div>
-                        <div class="resolution-card" data-resolution="hd" tabindex="0">
-                            <div class="resolution-label">HD Quality</div>
-                            <div class="resolution-size">1920x1080</div>
-                        </div>
-                        <div class="resolution-card" data-resolution="4k" tabindex="0">
-                            <div class="resolution-label">4K Quality</div>
-                            <div class="resolution-size">3840x2160</div>
-                        </div>
-                    </div>
+                <div class="resolution-options"></div>
+                    
 
                     <div class="download-actions">
                         <button class="btn-download" type="button">
@@ -323,7 +313,8 @@ if (isset($_SESSION['username'])) {
                     .then(data => {
                         if (data.success) {
                             showMessage(data.message, 'success');
-                            resetForm();
+                            // Start polling for processed image
+                            pollProcessedImage(data.upload_id);
                         } else {
                             showMessage(data.message, 'error');
                             uploadButton.disabled = false;
