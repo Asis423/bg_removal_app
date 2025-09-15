@@ -87,6 +87,11 @@ function updateAuthUI() {
     const adminLink = document.getElementById('admin-link');
     const logoutLink = document.getElementById('logout-link');
 
+    if (!authLink || !adminLink || !logoutLink) {
+        console.warn("Auth UI elements not found in DOM");
+        return;
+    }
+
     if (currentUser) {
         authLink.style.display = 'none';
         logoutLink.style.display = 'inline-flex';
@@ -99,6 +104,10 @@ function updateAuthUI() {
         logoutLink.style.display = 'none';
     }
 }
+
+
+
+
 
 function showLogin() { showPage('login'); }
 function showRegister() { showPage('register'); }
@@ -174,7 +183,7 @@ function processFile(file) {
         .then(data => {
             if (data.success) {
                 currentUploadId = data.upload_id;
-                startPolling(currentUploadId);
+                pollProcessing(currentUploadId);
             } else {
                 alert(data.message || 'Upload failed.');
                 isUploading = false;
@@ -186,73 +195,19 @@ function processFile(file) {
             isUploading = false;
         });
 }
-// ==========================
-// Poll Processed Image
-// ==========================
-function startPolling(uploadId) {
-    const step2 = document.getElementById('step2');
-    const step3 = document.getElementById('step3');
-    const progressBar = document.getElementById('progressBar');
 
-    // Reset steps
-    step2.classList.remove('completed', 'active');
-    step3.classList.remove('completed', 'active');
-    progressBar.style.width = '0%';
-
-    step2.classList.add('active');
-    let dots = 0;
-
-    // Clear any previous interval
-    if (pollInterval) clearInterval(pollInterval);
-
-    pollInterval = setInterval(() => {
-        const loadingText = step2.querySelector('.step-loading');
-        dots = (dots + 1) % 4;
-        loadingText.textContent = 'Analyzing image' + '.'.repeat(dots);
-
-        fetch(`check_status.php?upload_id=${uploadId}`)
-            .then(res => res.json())
-            .then(result => {
-                if (result.success && result.status === 'completed') {
-                    clearInterval(pollInterval);
-
-                    step2.classList.remove('active');
-                    step2.classList.add('completed');
-                    loadingText.textContent = 'Analysis complete!';
-
-                    // Step 3 - show processed image
-                    step3.classList.add('active');
-                    const processedImg = document.getElementById('processedImage');
-                    processedImg.src = result.data.processed_image_url;
-                    processedImg.style.display = 'block';
-                    step3.querySelector('.step-loading').style.display = 'none';
-                    progressBar.style.width = '100%';
-
-                    processedImageData = result.data.processed_image_url;
-
-                    // Show resolution options
-                    document.getElementById('resolutionContainer').classList.remove('hidden');
-                    showDynamicResolutions(processedImg);
-
-                    isUploading = false;
-                } else if (result.success && result.status === 'pending') {
-                    let currentWidth = parseInt(progressBar.style.width) || 10;
-                    if (currentWidth < 80) progressBar.style.width = (currentWidth + 2) + '%';
-                }
-            })
-            .catch(err => console.error(err));
-    }, 800); // polling every 0.8s
-}
 
 // ==========================
 // Dynamic Resolution Cards
 // ==========================
 function showDynamicResolutions(img) {
-    img.onload = function () {
+    const createResolutionOptions = function() {
         const w = img.naturalWidth;
         const h = img.naturalHeight;
 
         const container = document.querySelector('.resolution-options');
+        if (!container) return;
+
         container.innerHTML = `
             <div class="resolution-card selected" data-scale="1" tabindex="0">
                 <div class="resolution-label">Original</div>
@@ -268,15 +223,25 @@ function showDynamicResolutions(img) {
             </div>
         `;
 
-        container.querySelectorAll('.resolution-card').forEach(card => {
+        const cards = container.querySelectorAll('.resolution-card');
+        cards.forEach(card => {
             card.addEventListener('click', function() {
-                container.querySelectorAll('.resolution-card').forEach(c => c.classList.remove('selected'));
+                cards.forEach(c => c.classList.remove('selected'));
                 this.classList.add('selected');
                 selectedResolution = this.dataset.scale;
             });
         });
+
+        container.style.display = 'block';
     };
+
+    if (img.complete && img.naturalWidth !== 0) {
+        createResolutionOptions();
+    } else {
+        img.onload = createResolutionOptions;
+    }
 }
+
 
 // ==========================
 // Download Image
@@ -345,63 +310,83 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 
+function pollProcessing(uploadId) {
+    const interval = setInterval(async () => {
+        try {
+            const response = await fetch(`check_status.php?upload_id=${uploadId}`);
+            const result = await response.json();
+            console.log('Polling result:', result); // Debug log
 
-function pollProcessedImage(upload_id) {
-    const step2 = document.getElementById('step2');
-    const step3 = document.getElementById('step3');
-    const progressBar = document.getElementById('progressBar');
+            if (result.success) {
+                const step2 = document.getElementById('step2');
+                const step3 = document.getElementById('step3');
+                const processedImage = document.getElementById('processedImage');
+                
+                // Use more robust element selection
+                const step3Loading = document.querySelector('#step3 .step-loading') || 
+                                    document.getElementById('step3Loading');
 
-    let dots = 0;
-
-    // Ensure only one interval is active
-    if (window.pollInterval) clearInterval(window.pollInterval);
-
-    step2.classList.add('active');
-    step2.querySelector('.step-loading').textContent = 'Analyzing image...';
-
-    window.pollInterval = setInterval(() => {
-        // Animate dots for AI Analysis
-        dots = (dots + 1) % 4;
-        step2.querySelector('.step-loading').textContent = 'Analyzing image' + '.'.repeat(dots);
-
-        fetch(`check_status.php?upload_id=${upload_id}`)
-            .then(res => res.json())
-            .then(result => {
-                if (result.success && result.status === 'completed') {
-                    clearInterval(window.pollInterval);
-                    window.pollInterval = null;
-
-                    // Step 2 complete
-                    step2.classList.remove('active');
-                    step2.classList.add('completed');
-                    step2.querySelector('.step-loading').textContent = 'Analysis complete!';
-
-                    // Step 3: show processed image
-                    step3.classList.add('active');
-                    const processedImg = document.getElementById('processedImage');
-                    processedImg.src = result.data.processed_image_url;
-                    processedImg.style.display = 'block';
-                    step3.querySelector('.step-loading').style.display = 'none';
-
-                    // Update progress bar
-                    progressBar.style.width = '100%';
-
-                    // Show resolution options dynamically
-                    showDynamicResolutions(processedImg);
-
-                    // Make resolution container visible
-                    document.getElementById('resolutionContainer').classList.remove('hidden');
-                } else if (result.success && result.status === 'pending') {
-                    // Optional: slow progress bar animation while pending
-                    let currentWidth = parseInt(progressBar.style.width) || 20;
-                    if (currentWidth < 80) progressBar.style.width = (currentWidth + 1) + '%';
+                if (result.data.status === "processing") {
+                    step2.classList.add("active");
+                    const step2Desc = step2.querySelector(".step-description");
+                    if (step2Desc) step2Desc.textContent = "Analyzing image...";
                 }
-            })
-            .catch(err => {
-                console.error('Error polling processed image:', err);
-            });
-    }, 1000); // poll every 1 second
+
+                if (result.data.status === "completed") {
+                    clearInterval(interval);
+                    console.log('Processing completed!'); // Debug log
+
+                    // Update step 2
+                    step2.classList.remove("active");
+                    step2.classList.add("completed");
+                    const step2Desc = step2.querySelector(".step-description");
+                    if (step2Desc) step2Desc.textContent = "Analysis complete!";
+
+                    // Update step 3
+                    step3.classList.add("active");
+                    const step3Desc = step3.querySelector(".step-description");
+                    if (step3Desc) step3Desc.textContent = "Background removed!";
+                    
+                    // Hide loading and show image
+                    if (step3Loading) step3Loading.style.display = "none";
+                    
+                    // Set image source and make sure it's visible
+                    processedImage.src = result.data.processed_image_url;
+                    processedImage.style.display = "block";
+                    processedImage.onload = function() {
+                        console.log('Processed image loaded successfully');
+                    };
+                    processedImage.onerror = function() {
+                        console.error('Failed to load processed image');
+                        if (step3Loading) {
+                            step3Loading.style.display = "block";
+                            step3Loading.textContent = "Error loading image";
+                        }
+                    };
+
+                    // Show resolution options
+                    showDynamicResolutions(processedImage);
+                    
+                    // Store the processed image data for download
+                    processedImageData = result.data.processed_image_url;
+                    
+                    // Show download section
+                    const resolutionContainer = document.getElementById("resolutionContainer");
+                    if (resolutionContainer) resolutionContainer.classList.remove("hidden");
+                }
+            } else {
+                clearInterval(interval);
+                showMessage("Error: " + (result.message || 'Unknown error'), "error");
+            }
+        } catch (error) {
+            clearInterval(interval);
+            showMessage("Error polling status: " + error.message, "error");
+            console.error('Polling error:', error);
+        }
+    }, 3000); // Check every 3 seconds
 }
+
+
 
 
 

@@ -214,3 +214,43 @@
         font-size: 0.85rem;
     }
 }
+
+.resolution-container {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.resolution-options {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.resolution-card {
+    padding: 1rem;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.resolution-card:hover {
+    border-color: #007bff;
+    transform: translateY(-2px);
+}
+
+.resolution-card.selected {
+    border-color: #007bff;
+    background-color: #e8f4ff;
+}
+
+.download-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}

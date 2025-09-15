@@ -47,6 +47,12 @@ if (isset($_SESSION['username'])) {
                 <?php else: ?>
                     <li><a class="nav-link" href="login.php">Login</a></li>
                     <li><a class="nav-link" href="register.php">Sign Up</a></li>
+                    <nav>
+  <a id="auth-link" href="#" onclick="showLogin()">Login / Register</a>
+  <a id="admin-link" href="#" style="display:none;">Admin Panel</a>
+  <a id="logout-link" href="#" style="display:none;" onclick="logout()">Logout</a>
+</nav>
+
                 <?php endif; ?>
             </ul>
         </div>
@@ -85,16 +91,6 @@ if (isset($_SESSION['username'])) {
                 </div>
 
                 <input type="file" id="fileInput" class="file-input" accept="image/*">
-
-                <div class="preview-container" id="previewContainer">
-                    <div class="preview-title">Image Preview</div>
-                    <img id="imagePreview" class="image-preview preview-target" src="" alt="Preview">
-                </div>
-
-                <button id="uploadButton" class="btn-upload" disabled>
-                    <i class="fas fa-upload"></i> Upload Image
-                </button>
-
                 <div id="message" class="message"></div>
             </div>
         </section>
@@ -148,18 +144,18 @@ if (isset($_SESSION['username'])) {
                 </div>
 
                 <!-- Resolution Selection (Always visible) -->
-                <div class="resolution-options"></div>
-                    
-
-                    <div class="download-actions">
-                        <button class="btn-download" type="button">
-                            <i class="fas fa-download"></i> Download Image
-                        </button>
-                        <button class="btn-reset" type="button">
-                            <i class="fas fa-refresh"></i> Process Another
-                        </button>
-                    </div>
-                </div>
+              <div id="resolutionContainer" class="resolution-container hidden">
+    <h3>Select Resolution</h3>
+    <div class="resolution-options"></div>
+    <div class="download-actions">
+        <button class="btn-download" onclick="downloadImage()">
+            <i class="fas fa-download"></i> Download Image
+        </button>
+        <button class="btn-reset" onclick="resetProcessor()">
+            <i class="fas fa-refresh"></i> Process Another
+        </button>
+    </div>
+</div>
             </div>
         </div>
     </div>
@@ -289,6 +285,7 @@ if (isset($_SESSION['username'])) {
                         previewContainer.style.display = 'block';
                         uploadButton.disabled = false;
                     };
+                    scrollToPreview();
                     reader.readAsDataURL(file);
                 }
             }
@@ -303,7 +300,7 @@ if (isset($_SESSION['username'])) {
                 // Disable upload button during upload
                 uploadButton.disabled = true;
                 uploadButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
-                scrollToPreview();
+                
                 // Send to server
                 fetch('upload.php', {
                     method: 'POST',
@@ -314,7 +311,7 @@ if (isset($_SESSION['username'])) {
                         if (data.success) {
                             showMessage(data.message, 'success');
                             // Start polling for processed image
-                            pollProcessedImage(data.upload_id);
+                          pollProcessing(data.upload_id);
                         } else {
                             showMessage(data.message, 'error');
                             uploadButton.disabled = false;
@@ -357,7 +354,24 @@ if (isset($_SESSION['username'])) {
                     previewSection.scrollIntoView({ behavior: "smooth" });
                 }
             }
+            function showMessage(message, type) {
+    // Create or find message element
+    let messageDiv = document.getElementById('message');
+    if (!messageDiv) {
+        messageDiv = document.createElement('div');
+        messageDiv.id = 'message';
+        document.body.appendChild(messageDiv);
+    }
+    
+    messageDiv.textContent = message;
+    messageDiv.className = `message ${type}`;
+    messageDiv.style.display = 'block';
 
+    // Auto hide after 5 seconds
+    setTimeout(() => {
+        messageDiv.style.display = 'none';
+    }, 5000);
+}
 
     </script>
 
