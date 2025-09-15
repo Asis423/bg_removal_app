@@ -1,0 +1,45 @@
+.profile-wrapper {
+  position: relative;
+}
+
+.profile-circle {
+  background: var(--primary-orange);
+  color: white;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.dropdown {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 0px;
+  background: white;
+  color: black;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  min-width: 150px;
+  z-index: 999;
+}
+
+.dropdown a {
+  display: block;
+  padding: 10px;
+  color: black;
+  text-decoration: none;
+}
+
+.dropdown a:hover {
+  background: #eee;
+}
+
+/* 👇 pure CSS toggle */
+.profile-wrapper:hover .dropdown {
+  display: block;
+}
