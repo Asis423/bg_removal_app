@@ -109,13 +109,7 @@
         function showLogin() { showPage('login'); }
         function showRegister() { showPage('register'); }
 
-        // Scroll to upload
-        function scrollToUpload() {
-            showPage('home');
-            setTimeout(() => {
-                document.querySelector('.upload-section').scrollIntoView({ behavior: 'smooth' });
-            }, 100);
-        }
+      
 
         // Drag-drop
         function handleDrop(event) {

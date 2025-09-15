@@ -26,28 +26,11 @@ if (isset($_SESSION['username'])) {
 </head>
 
 <body>
-   <?php include './components/navbar.php'; ?>
+   <?php include('./components/navbar.php'); ?>
 
     <!-- Home Section -->
     <div id="home" class="page-section active">
-        <!-- Hero Section -->
-        <section class="hero-section">
-            <div class="hero-content">
-                <h1 class="hero-title">Remove Backgrounds With Style In Seconds </h1>
-                <p class="hero-subtitle">
-                    Transform your images instantly with our advanced AI-powered background removal tool. Professional
-                    results in seconds.
-                </p>
-                <div class="hero-cta">
-                    <a href="./login.php" class="btn-primary" onclick="scrollToUpload()">
-                        <i class="fas fa-upload"></i> Start Removing Backgrounds
-                    </a>
-                    <a href="about.php" class="btn-secondary">
-                        <i class="fas fa-play"></i> Learn More
-                    </a>
-                </div>
-            </div>
-        </section>
+       <?php include './components/hero.php'; ?>
 
         <!-- Upload Section -->
         <section class="upload-section">
@@ -290,14 +273,7 @@ if (isset($_SESSION['username'])) {
         function showLogin() { showPage('login'); }
         function showRegister() { showPage('register'); }
 
-        // Scroll to upload
-        function scrollToUpload() {
-            showPage('home');
-            setTimeout(() => {
-                document.querySelector('.upload-section').scrollIntoView({ behavior: 'smooth' });
-            }, 100);
-        }
-
+       
         // Drag-drop
         function handleDrop(event) {
             event.preventDefault();
@@ -639,6 +615,7 @@ if (isset($_SESSION['username'])) {
             }, 5000);
         }
 </script>
+<script src="../components/js/generalFunctions.js"></script>
 </body>
 
 </html>
