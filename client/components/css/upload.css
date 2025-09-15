@@ -227,27 +227,28 @@
 .resolution-options {
     display: flex;
     justify-content: center;
-    gap: 1rem;
-    margin: 1.5rem 0;
+    gap: 1.5rem; /* slightly bigger gap */
+    margin: 2rem 0; /* more spacing */
 }
 
 .resolution-card {
-    padding: 1rem;
-    border: 2px solid #e9ecef;
-    border-radius: 8px;
+    width: 500px;          
+    padding: 20px 15px; /* bigger padding */
+    border: 2px solid #007bff;
+    border-radius: 10px;
+    text-align: center;
     cursor: pointer;
-    transition: all 0.3s ease;
-    background: white;
+    transition: transform 0.2s, box-shadow 0.2s;
+    font-size: 1.1rem; /* larger font */
 }
 
 .resolution-card:hover {
-    border-color: #007bff;
-    transform: translateY(-2px);
+    transform: scale(1.1);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
 
 .resolution-card.selected {
-    border-color: #007bff;
-    background-color: #e8f4ff;
+    color: #fff;
 }
 
 .download-actions {

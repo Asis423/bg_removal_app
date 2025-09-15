@@ -241,23 +241,57 @@ if (isset($_SESSION['username'])) {
         }
 
         function resetProcessor() {
-            document.getElementById('processingContainer').classList.add('hidden');
-            document.getElementById('resolutionContainer').classList.add('hidden');
-            document.querySelectorAll('.process-step').forEach(step => {
-                step.classList.remove('active', 'completed');
-            });
-            document.getElementById('progressBar').style.width = '0%';
-            document.getElementById('originalImage').style.display = 'none';
-            document.getElementById('processedImage').style.display = 'none';
-            document.getElementById('analysisSpinner').style.display = 'none';
-            document.querySelectorAll('.step-loading').forEach((loading, index) => {
-                const texts = ['Waiting for upload...', 'Ready for analysis...', 'Awaiting processing...'];
-                loading.textContent = texts[index];
-                loading.style.display = 'block';
-            });
-            document.getElementById('fileInput').value = '';
-            processedImageData = null;
-        }
+    // Reset all steps
+    document.querySelectorAll('.process-step').forEach(step => {
+        step.classList.remove('active', 'completed');
+    });
+
+    // Reset progress bar
+    const progressBar = document.getElementById('progressBar');
+    if (progressBar) progressBar.style.width = '0%';
+
+    // Hide images
+    const originalImage = document.getElementById('originalImage');
+    if (originalImage) originalImage.style.display = 'none';
+    const processedImage = document.getElementById('processedImage');
+    if (processedImage) processedImage.style.display = 'none';
+
+    // Hide any spinner
+    const analysisSpinner = document.getElementById('analysisSpinner');
+    if (analysisSpinner) analysisSpinner.style.display = 'none';
+
+    // Reset loading text for steps
+    const stepLoadings = document.querySelectorAll('.step-loading');
+    const defaultTexts = ['Waiting for upload...', 'Ready for analysis...', 'Awaiting processing...'];
+    stepLoadings.forEach((loading, index) => {
+        loading.textContent = defaultTexts[index] || 'Processing...';
+        loading.style.display = 'block';
+    });
+
+    // Clear file input
+    const fileInput = document.getElementById('fileInput');
+    if (fileInput) fileInput.value = '';
+
+    // Hide resolution container and clear selections
+    const resolutionContainer = document.getElementById('resolutionContainer');
+    if (resolutionContainer) {
+        resolutionContainer.classList.add('hidden');
+        const cards = resolutionContainer.querySelectorAll('.resolution-card');
+        cards.forEach(card => card.classList.remove('selected'));
+    }
+
+    // Reset processed image data
+    processedImageData = null;
+
+
+    const imagePreview = document.getElementById('imagePreview');
+if (imagePreview) {
+    imagePreview.style.display = 'none';
+    imagePreview.src = '';
+}
+
+}
+
 
         // Admin stats
         function updateAdminStats() {
