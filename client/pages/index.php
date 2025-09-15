@@ -22,9 +22,7 @@ if (isset($_SESSION['username'])) {
     <link rel="stylesheet" href="../components/css/style.css" />
     <link rel="stylesheet" href="../components/css/upload.css" />
     <link rel="stylesheet" href="../components/css/dashboard.css" />
-    <style>
-       
-    </style>
+    <link rel="stylesheet" href="../components/css/process.css" />
 </head>
 
 <body>
