@@ -1,10 +1,10 @@
 <?php
 session_start();
-require_once './server/db.php';
+require_once '../server/db.php';
 
 // If logged in, redirect
 if (isset($_SESSION['user_id'])) {
-    header("Location: user_dashboard.php");
+    header("Location: ./server/user_dashboard.php");
     exit;
 }
 

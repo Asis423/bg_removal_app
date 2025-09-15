@@ -21,7 +21,7 @@ $name = htmlspecialchars($_SESSION['user']['name']);
         <a href="users_home.php" class="brand"><i class="fas fa-magic"></i> BG Remover Pro</a>
         <ul class="nav-menu">
             <li>Hello, <?php echo $name; ?></li>
-            <li><a href="logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            <li><a href="./auth/logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
         </ul>
     </div>
 </nav>

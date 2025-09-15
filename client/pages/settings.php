@@ -354,11 +354,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <li><a class="nav-link" href="index.php">Home</a></li>
                 <li><a class="nav-link" href="about.php">About</a></li>
                 <?php if ($is_admin): ?>
-                    <li><a class="nav-link" href="admin_dashboard.php">Dashboard</a></li>
+                    <li><a class="nav-link" href="./server/admin_dashboard.php">Dashboard</a></li>
                 <?php else: ?>
                     <li><a class="nav-link" href="user_dashboard.php">Dashboard</a></li>
                 <?php endif; ?>
-                <li><a class="nav-link logout" href="./server/logout.php">Logout</a></li>
+                <li><a class="nav-link logout" href="./auth/logout.php">Logout</a></li>
             </ul>
         </div>
     </nav>

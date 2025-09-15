@@ -1,6 +1,6 @@
 <?php
 session_start();
-require "./server/db.php";
+require "db.php";
 
 // Redirect if not logged in or not admin
 if (!isset($_SESSION["user_id"]) || !$_SESSION["is_admin"]) {
@@ -86,8 +86,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["action"])) {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>BG Remover Pro - Admin Dashboard</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="../components/css/style.css" />
-    <link rel="stylesheet" href="../components/css/admin.css" />
+    <link rel="stylesheet" href="../../components/css/style.css" />
+    <link rel="stylesheet" href="../../components/css/admin.css" />
+    <link rel="stylesheet" href="../../components/css/dashboard.css" />
    
 </head>
 <body>

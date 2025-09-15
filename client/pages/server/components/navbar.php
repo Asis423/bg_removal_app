@@ -14,9 +14,6 @@ if (isset($_SESSION['username'])) {
         $initials .= strtoupper(substr($name_parts[1], 0, 1));
     }
 }
-
-// Default to non-admin if not set
-$is_admin = $_SESSION['is_admin'] ?? 0;
 ?>
 
 <nav class="navbar">
@@ -26,18 +23,14 @@ $is_admin = $_SESSION['is_admin'] ?? 0;
             BG Remover Pro
         </a>
         <ul class="nav-menu">
-            <li><a class="nav-link" href="index.php">Home</a></li>
-            <li><a class="nav-link" href="about.php">About</a></li>
+            <li><a class="nav-link" href="../index.php">Home</a></li>
+            <li><a class="nav-link" href="../about.php">About</a></li>
 
             <?php if (isset($_SESSION['user_id'])): ?>
                 <li class="profile-wrapper">
                     <div class="profile-circle"><?= htmlspecialchars($initials) ?></div>
                     <div class="dropdown">
-                        <?php if ($is_admin): ?>
-                            <a class="nav-link" href="./server/admin_dashboard.php">Dashboard</a>
-                        <?php else: ?>
-                            <a class="nav-link" href="user_dashboard.php">Dashboard</a>
-                        <?php endif; ?>
+                        <a href="user_dashboard.php">Dashboard</a>
                         <a href="settings.php">Settings</a>
                         <a href="./auth/logout.php">Logout</a>
                     </div>

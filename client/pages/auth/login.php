@@ -1,16 +1,17 @@
 <?php
 session_start();
-include_once "./server/db.php";
+include_once "../server/db.php";
 
 // Redirect if already logged in
 if (isset($_SESSION['user_id'])) {
     if ($_SESSION['is_admin']) {
-        header("Location: admin_dashboard.php");
+        header("Location: ../server/admin_dashboard.php");
     } else {
-        header("Location: user_dashboard.php");
+        header("Location: ../server/user_dashboard.php");
     }
     exit();
 }
+
 
 $error = "";
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
@@ -28,9 +29,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $_SESSION["is_admin"] = $user["is_admin"];
 
             if ($user["is_admin"]) {
-                header("Location: admin_dashboard.php");
+                header("Location: ../server/admin_dashboard.php");
             } else {
-                header("Location: user_dashboard.php");
+                header("Location: ../server/user_dashboard.php");
             }
             exit();
         } else {
