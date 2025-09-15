@@ -30,8 +30,12 @@ if (isset($_SESSION['username'])) {
                 <li class="profile-wrapper">
                     <div class="profile-circle"><?= htmlspecialchars($initials) ?></div>
                     <div class="dropdown">
-                        <a href="user_dashboard.php">Dashboard</a>
-                        <a href="settings.php">Settings</a>
+                        <?php if ($is_admin): ?>
+                            <a class="nav-link" href="./admin_dashboard.php">Dashboard</a>
+                        <?php else: ?>
+                            <a class="nav-link" href="./user_dashboard.php">Dashboard</a>
+                        <?php endif; ?>
+                        <a href="../settings.php">Settings</a>
                         <a href="./auth/logout.php">Logout</a>
                     </div>
                 </li>
