@@ -7,6 +7,7 @@
 
 .upload-container {
     max-width: 700px;
+    max-height: 1200px;
     margin: 0 auto;
     padding: 2rem;
     background: var(--surface-secondary, #f8f9fa);
