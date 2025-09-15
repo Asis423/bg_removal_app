@@ -68,6 +68,31 @@ if (isset($_SESSION['username'])) {
         function showLogin() { showPage('login'); }
         function showRegister() { showPage('register'); }
 
+          // Authentication
+
+
+        function updateAuthUI() {
+            const authLink = document.getElementById('auth-link');
+            const adminLink = document.getElementById('admin-link');
+            const logoutLink = document.getElementById('logout-link');
+
+            if (!authLink || !adminLink || !logoutLink) {
+                console.warn("Auth UI elements not found in DOM");
+                return;
+            }
+
+            if (currentUser) {
+                authLink.style.display = 'none';
+                logoutLink.style.display = 'inline-flex';
+                if (currentUser.role === 'admin') {
+                    adminLink.style.display = 'block';
+                }
+            } else {
+                authLink.style.display = 'block';
+                adminLink.style.display = 'none';
+                logoutLink.style.display = 'none';
+            }
+        }
        
         // Drag-drop
         function handleDrop(event) {
