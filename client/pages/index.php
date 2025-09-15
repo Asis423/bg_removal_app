@@ -31,136 +31,9 @@ if (isset($_SESSION['username'])) {
     <!-- Home Section -->
     <div id="home" class="page-section active">
        <?php include './components/hero.php'; ?>
-
-        <!-- Upload Section -->
-        <section class="upload-section">
-            <div class="upload-container">
-                <div class="upload-area" id="uploadArea">
-                    <div class="upload-icon">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                    </div>
-                    <div class="upload-text">Drag & Drop or Click to Browse</div>
-                    <div class="upload-subtext">Supports JPG, PNG, WEBP - Max 10MB</div>
-                </div>
-
-                <input type="file" id="fileInput" class="file-input" accept="image/*">
-                <div id="message" class="message"></div>
-            </div>
-        </section>
-
-        <!-- Processing Section (Visible by default, no hiding) -->
-        <div id="processingContainer" class="container">
-            <div class="processing-section">
-                <div class="processing-header">
-                    <h2 class="processing-title">Processing Your Image</h2>
-                    <p class="processing-subtitle">Our AI is working its magic to remove the background</p>
-                </div>
-
-                <div class="progress-container">
-                    <div class="progress-bar" id="progressBar"></div>
-                </div>
-
-                <div class="process-steps">
-                    <div class="process-step" id="step1">
-                        <div class="step-number">1</div>
-                        <h3 class="step-title">Upload Complete</h3>
-                        <p class="step-description">Your image has been uploaded successfully</p>
-                        <div class="step-image">
-                            <img id="imagePreview" class="image-preview preview-target" src="" alt="Preview">
-                            <div class="step-loading">Waiting for upload...</div>
-                        </div>
-                    </div>
-
-                    <div class="process-step" id="step2">
-                        <div class="step-number">2</div>
-                        <h3 class="step-title">AI Analysis</h3>
-                        <p class="step-description">Analyzing image content and detecting subjects</p>
-                        <div class="step-image">
-                            <!-- Magic visual placeholder -->
-                            <div class="magic-loader" id="magicLoader">
-                                <span></span><span></span><span></span><span></span>
-                            </div>
-                            <div class="step-loading">Analyzing...</div>
-                        </div>
-                    </div>
-
-                   <?php include './components/process.php'; ?>
-                </div>
-
-                <!-- Resolution Selection (Always visible) -->
-                <div id="resolutionContainer" class="resolution-container hidden">
-                    <h3>Select Resolution</h3>
-                    <div class="resolution-options"></div>
-                    <div class="download-actions">
-                        <button class="btn-download" onclick="downloadImage()">
-                            <i class="fas fa-download"></i> Download Image
-                        </button>
-                        <button class="btn-reset" onclick="resetProcessor()">
-                            <i class="fas fa-refresh"></i> Process Another
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Latest Processed Image Display (Optional - shows if upload_id is provided in URL) -->
-       <?php include './components/latest.php';?>
-    </div>
-
-    <div id="about" class="page-section">
-        <div class="container section">
-            <div class="text-center">
-                <h1>About BG Remover Pro</h1>
-                <p>We're revolutionizing image editing with cutting-edge AI technology that makes professional
-                    background removal accessible to everyone.</p>
-            </div>
-        </div>
-    </div>
-
-    <div id="login" class="page-section">
-        <div class="container">
-            <form action="login.php" method="POST">
-                <input type="email" name="email" required placeholder="Email" />
-                <input type="password" name="password" required placeholder="Password" />
-                <button type="submit">Login</button>
-            </form>
-        </div>
-    </div>
-
-    <div id="register" class="page-section">
-        <div class="container">
-            <form action="signup.php" method="POST">
-                <input type="text" name="name" required placeholder="Full Name" />
-                <input type="email" name="email" required placeholder="Email" />
-                <input type="password" name="password" required placeholder="Password" />
-                <button type="submit">Register</button>
-            </form>
-        </div>
-    </div>
-
-    <div id="admin" class="page-section">
-        <div class="container section">
-            <h1>Admin Dashboard</h1>
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>User</th>
-                        <th>Action</th>
-                        <th>Time</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>demo@user.com</td>
-                        <td>Upload</td>
-                        <td>Just now</td>
-                        <td>Success</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
+       <?php include './components/upload.php'; ?>
+       <?php include './components/process.php'; ?>
+     </div>
 
    <script >
         // Global variables
@@ -325,6 +198,7 @@ if (isset($_SESSION['username'])) {
                 img.src = e.target.result;
                 img.style.display = 'block';
                 document.getElementById('step1').classList.add('completed');
+                scrollToPreview();
             };
             reader.readAsDataURL(file);
 
@@ -417,8 +291,6 @@ if (isset($_SESSION['username'])) {
                 headers: {'Content-Type': 'application/x-www-form-urlencoded'},
                 body: `processed_image_url=${encodeURIComponent(processedImageData)}&user_id=${currentUser ? currentUser.id : 0}`
             });
-
-            alert('Image downloaded successfully!');
         }
 
         function resetProcessor() {
@@ -616,6 +488,7 @@ if (isset($_SESSION['username'])) {
         }
 </script>
 <script src="../components/js/generalFunctions.js"></script>
+<script src="../components/js/main.js"></script>
 </body>
 
 </html>
