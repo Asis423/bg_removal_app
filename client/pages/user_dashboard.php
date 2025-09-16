@@ -520,6 +520,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES["image"])) {
                 <?php endif; ?>
             </form>
         </section>
+        <?php 
+$imageExists = false; 
+$imagePath = ''; 
+include './components/process.php'; 
+?>
+
         
         <!-- Recent Uploads Section -->
         <section class="uploads-section">
