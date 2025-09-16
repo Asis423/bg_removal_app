@@ -88,6 +88,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["action"])) {
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="../components/css/style.css" />
     <link rel="stylesheet" href="../components/css/admin.css" />
+    <link rel="stylesheet" href="../components/css/dashboard.css" />
    
 </head>
 <body>

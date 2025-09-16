@@ -1,10 +1,16 @@
 <?php
 session_start();
 require "./server/db.php";
-
+$current_script = basename($_SERVER['PHP_SELF']);
 // Redirect if not logged in
 if (!isset($_SESSION["user_id"])) {
     header("Location: login.php");
+    exit();
+}
+
+// Redirect admin users to admin_dashboard.php if they try to access user_dashboard.php
+if ($_SESSION["is_admin"] && $current_script === 'user_dashboard.php') {
+    header("Location: admin_dashboard.php");
     exit();
 }
 
