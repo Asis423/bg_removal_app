@@ -1212,10 +1212,6 @@ $all_users = $users_stmt->fetchAll(PDO::FETCH_ASSOC);
                 // Reapply filter if one is selected
                 filterUploads();
             })
-            .catch(err => {
-                console.error('Error updating recent uploads:', err);
-                showMessage('Error updating recent uploads.', 'error');
-            });
         }
     </script>
 </body>
